@@ -120,7 +120,17 @@
   time.timeZone = "America/Los_Angeles";
 
   # Enable CUPS to print documents.
-  services.printing.enable = true;
+  services.printing = {
+      enable = true;
+      drivers = [ pkgs.hplip ];
+  };
+
+  # AUTOMATIC WIRELESS PRINTER DISCOVERY (mDNS / Bonjour routing)
+  services.avahi = {
+    enable = true;
+    nssmdns4 = true;          # Allows the system to resolve the printer's network name
+    openFirewall = true;      # Automatically opens network discovery ports in your firewall
+  };
 
   # Enable sound.
   security.rtkit.enable = true;
@@ -183,6 +193,9 @@
     wineWowPackages.unstableFull # Full Wine layer supporting both 32-bit and 64-bit windows binaries
     winetricks                   # Manual DLL installation helper tool for standalone Wine prefixes
     steam-run                    # Incredibly helpful utility to run raw binaries inside Steam's environment
+    
+  # PRINTER UTILITIES & FIRMWARE LAYERS
+    hplipWithPlugin            # FIXED: Exposes hp-setup and handles network firmware hooks
 
   # ADD THE NOCTALIA PACKAGE FROM FLAKE INPUTS NATIVELY HERE
     inputs.noctalia.packages.${pkgs.system}.default
