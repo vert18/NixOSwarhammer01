@@ -1,14 +1,15 @@
 # Edit this configuration file to define what should be installed on
 # your system. Help is available in the configuration.nix(5) man page, on
-# https://search.nixos.org/options and in the NixOS manual (`nixos-help`).
+# https://nixos.org and in the NixOS manual (`nixos-help`).
 
 { config, lib, pkgs, inputs, ... }:
 
 {
-  imports =
-    [ # Include the results of the hardware scan.
-      ./hardware-configuration.nix
-    ];
+  # MERGED IMPORTS BLOCK: Combined hardware scan and Umbriel compositor module
+  imports = [ 
+    ./hardware-configuration.nix
+    inputs.umbriel.nixosModules.default
+  ];
 
   # Allow Unfree packages
   nixpkgs.config.allowUnfree = true;
@@ -17,19 +18,19 @@
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
   boot.loader.systemd-boot.configurationLimit = 5;
+ 
+  # VIRTUAL IN-MEMORY SWAP: Fast, compressed block device in your RAM pool
+  zramSwap = {
+    enable = true;
+    algorithm = "zstd";        # Fast memory compression
+    memoryPercent = 50;        # Allocates up to 50% of your RAM space for compression
+  };
 
   # Use latest kernel.
   boot.kernelPackages = pkgs.linuxPackages_latest;
-
-  # Hardware Enablement (RTX 5080 / AM5 CPU)
-  #boot.blacklistedKernelModules = [ "nouveau" "nvidiafb" ];
-  # boot.initrd.kernelModules = [ "nvidia" ];
-  #boot.extraModulePackages = [ config.boot.kernelPackages.nvidia_x11 ];
   
   # CRUCIAL NVIDIA DRM BOOT FLAGS... fixed waitpid / child process crashes
-  #boot.initrd.kernelModules = [ "nvidia" "nvidia_modset" "nvidia_uvm" "nvidia_drm" ];
   boot.kernelParams = [ "nvidia-drm.modeset=1" "nvidia-drm.fbdev=1" ];
-  
 
   services.xserver.videoDrivers = [ "nvidia" ];
   hardware.graphics.enable = true;
@@ -40,28 +41,32 @@
     open = true;
   };
 
+  # Automatically enforce user ownership over the LVM storage mount on boot
+  system.activationScripts.mylm-permissions = {
+    text = ''
+      mkdir -p /mnt/mylm
+      chown -R fearless:users /mnt/mylm
+      chmod -R u+rwX,g+rX,o-rwx /mnt/mylm
+    '';
+    deps = [];
+  };
+
   # Enable Hyprland Natively
   programs.hyprland = {
     enable = true;
     xwayland.enable = true;
   };
 
-  imports = [
-    inputs.umbriel.nixosModules.default
-  ];
-
   # Enable the compositor system-wide
   programs.umbriel.enable = true;
 
-  # Set up Cachix to grab pre-built binaries
+  # Set up Cachix to grab pre-built binaries securely
   nix.settings = {
-    extra-substituters = [ 
-      "https://umbriel.cachix.org" 
-      "https://noctalia.cachix.org" 
+    extra-substituters = [
+      "https://umbriel.cachix.org"
     ];
-    extra-trusted-public-keys = [ 
-      "umbriel.cachix.org-1:JfNq/2yg2S6D6z4Z2dVSZrZlDPQTKtexB6GAVLD98nw=" 
-      "noctalia.cachix.org-1: (if applicable, or omitted if relying on nixpkgs unstable)" 
+    extra-trusted-public-keys = [
+      "umbriel.cachix.org-1:JfNq/2yg2S6D6z4Z2dVSZrZlDPQTKtexB6GAVLD98nw="
     ];
   };
 
@@ -74,8 +79,10 @@
   # Nvidia specifics: ensure Wayland app compatibility
   environment.sessionVariables = {
     NIXOS_OZONE_WL = "1";
+    QT_AUTO_SCREEN_SCALE_FACTOR = "1";
+    QT_QPA_PLATFORMTHEME = "qt5ct";
+    GTK_THEME = "Adwaita:dark";
   };
-}
 
   # Network (wired ethernet auto-dhcp)
   networking.hostName = "warhammer";
@@ -88,8 +95,6 @@
   services.printing.enable = true;
 
   # Enable sound.
-  # services.pulseaudio.enable = true;
-  # OR
   security.rtkit.enable = true;
   services.pipewire = {
     enable = true;
@@ -97,50 +102,49 @@
     alsa.support32Bit = true;
     pulse.enable = true;
     wireplumber.enable = true;
-   };
+  };
 
   # Define your personal user account
   users.users.fearless = {
     isNormalUser = true;
     extraGroups = [ "wheel" ];
-    # Note: you can add default user packages here later
-    #packages = with pkgs; [
-    #  tree
-    #];
   };
 
-  # System Components and Shell Environment Assets
-  environment.systemPackages = [
-    # Core Script runtime engines for the bar/shell pipeline
-    # pull the live, compiled upstream ags package from out flake inputs
-    #inputs.ags.packages.${pkgs.system}.io
-    #inputs.ags.packages.${pkgs.system}.gtk3
-    inputs.ags.packages.${pkgs.system}.default
-    #inputs.ags.packages.${pkgs.system}.agsFull
+  # Force Qt applications to use standard portal settings for theming
+  qt = {
+    enable = true;
+    platformTheme = "qt5ct";
+    style = "adwaita-dark";
+  };
 
-    # Core Script runtime engine built with the explicit library bindings embedded
-    #(inputs.ags.packages.${pkgs.system}.default.override {
-    #  extraPackages = [
-    #    inputs.ags.packages.${pkgs.system}.io
-    #    inputs.ags.packages.${pkgs.system}.astal3
-    #  ];
-    #})
-  ] ++ (with pkgs; [  
+  # Enables the system configuration registry pipeline
+  programs.dconf.enable = true;
+
+  # System Components and Shell Environment Assets
+  environment.systemPackages = with pkgs; [  
     gjs                 # Gnome JavaScript bindings for widget processing
     bun                 # Blazing fast JS/TS engine to compile the assets
+    kitty               # Blazing fast GPU-Accelerated terminal
+    git
+    networkmanagerapplet # Network panel monitoring engine
+    libnotify           # Notification transmission protocol
+    firefox
+    discord
+    kdePackages.dolphin
+    yazi
+    flameshot
+    wl-clipboard
+    brightnessctl
+    wireplumber
+    lxqt.lxqt-policykit
 
-  # required background assets for modern bars
-  kitty                 # Blazing fast GPU-Accelerated terminal
-  git
-  rofi                  # Application launcher block
-  swww                  # High-performance hardware accelerated wallpaper
-  networkmanagerapplet  # Network panel moitoring engine
-  libnotify             # Notification transmission protocol
-  firefox
-  discord
+    # THEME ENGINES: Restores missing assets for Dolphin dark mode
+    kdePackages.breeze-icons   # Missing icon assets used by dark modes
+    kdePackages.breeze         # Core dark rendering assets for Qt6 apps
+    # libsForQt5.breeze-qt5      # Backward compatibility layer 
 
-  # Declarative Vim & Custom global .vimrc profile
-   (pkgs.vim-full.customize {
+    # Declarative Vim & Custom global .vimrc profile
+    (pkgs.vim-full.customize {
        name = "vim";
        vimrcConfig.customRC = ''
          filetype plugin indent on
@@ -157,40 +161,8 @@
          syntax on
          colorscheme desert
        '';
-     })
-   ]);
-  
-
-
-  # programs.firefox.enable = true;
-
-  # List packages installed in system profile.
-  # You can use https://search.nixos.org/ to find more packages (and options).
-  # environment.systemPackages = with pkgs; [
-  #   vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
-  #   wget
-  # ];
-
-  # Some programs need SUID wrappers, can be configured further or are
-  # started in user sessions.
-  # programs.mtr.enable = true;
-  # programs.gnupg.agent = {
-  #   enable = true;
-  #   enableSSHSupport = true;
-  # };
-
-  # List services that you want to enable:
-
-  # Enable the OpenSSH daemon.
-  # services.openssh.enable = true;
-
-  # Open ports in the firewall.
-  # networking.firewall.allowedTCPPorts = [ ... ];
-  # networking.firewall.allowedUDPPorts = [ ... ];
-  # Or disable the firewall altogether.
-  # networking.firewall.enable = false
+    })
+  ];
 
   system.stateVersion = "26.05"; # Did you read the comment?
-
 }
-

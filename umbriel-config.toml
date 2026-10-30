@@ -1,0 +1,32 @@
+[general]
+mod_key = "Super"
+autostart = [ "noctalia" ]
+
+[layout]
+gap = 24                  
+
+# CORRECTED: Set up dwindle across your whole monitor layout cleanly
+[[workspace]]
+name = "*"
+layout.mode = "dwindle"
+
+[output.DP-1]
+scale = 1.75
+
+[keybinds]
+"Mod+Return" = "spawn kitty"
+"Mod"        = "spawn noctalia msg panel-toggle launcher"
+"Mod+Q" = "window-close"
+"Mod+F" = "window-toggle-floating"
+
+"Mod+E"       = "spawn dolphin"
+"Mod+Shift+E" = "spawn kitty yazi"
+"Print"       = "spawn env XDG_CURRENT_DESKTOP=sway flameshot gui"
+"Mod+P"       = "spawn env XDG_CURRENT_DESKTOP=sway flameshot gui"
+
+# HARDWARE CONTROLS: Native Volume and Brightness key bindings
+"XF86AudioRaiseVolume" = "spawn wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+"
+"XF86AudioLowerVolume" = "spawn wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"
+"XF86AudioMute"        = "spawn wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"
+"XF86MonBrightnessUp"   = "spawn brightnessctl set 5%+"
+"XF86MonBrightnessDown" = "spawn brightnessctl set 5%-"
