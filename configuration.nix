@@ -36,7 +36,11 @@
   boot.kernelPackages = pkgs.linuxPackages_latest;
 
   # CRUCIAL NVIDIA DRM BOOT FLAGS... fixed waitpid / child process crashes
-  boot.kernelParams = [ "nvidia-drm.modeset=1" "nvidia-drm.fbdev=1" ];
+  boot.kernelParams = [ 
+    "nvidia-drm.modeset=1" 
+    "nvidia-drm.fbdev=1"
+    "loglevel=3"
+    ];
 
   services.xserver.videoDrivers = [ "nvidia" ];
   hardware.graphics.enable = true;
