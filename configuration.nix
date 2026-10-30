@@ -40,7 +40,19 @@
     "nvidia-drm.modeset=1" 
     "nvidia-drm.fbdev=1"
     "loglevel=3"
+    "sched_cluster=1" #Tweak 1 unleash ryzen 3d v-cache scheduling EEVDF 
+    "nvme_core.default_ps_max_latency_us=0" # max out nvme disko storage pipelines
+    "processor.max_cstate=1"  #zero workspace tiling micro-stutter disables the kernels aggressive cpu tpm
     ];
+
+  # Virtual Memory Controller Tuning for In-Memory ZRAM
+  boot.kernel.sysctl = {
+    # Aggressively offload idle memory blocks into compressed ZRAM cache early
+    "vm.swappiness" = 100;
+    
+    # Keeps your file manager directory navigation (Yazi) instantly cached in memory
+    "vm.vfs_cache_pressure" = 50;
+  };
 
   services.xserver.videoDrivers = [ "nvidia" ];
   hardware.graphics.enable = true;
