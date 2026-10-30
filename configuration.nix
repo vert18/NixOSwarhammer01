@@ -168,6 +168,8 @@
     winetricks                   # Manual DLL installation helper tool for standalone Wine prefixes
     steam-run                    # Incredibly helpful utility to run raw binaries inside Steam's environment
 
+  # ADD THE NOCTALIA PACKAGE FROM FLAKE INPUTS NATIVELY HERE
+    inputs.noctalia.packages.${pkgs.system}.default
 
     # THEME ENGINES: Restores missing assets for Dolphin dark mode
     kdePackages.breeze-icons   # Missing icon assets used by dark modes
