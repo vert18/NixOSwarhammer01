@@ -15,7 +15,7 @@ scale = 1.75
 
 [keybinds]
 "Mod+Return" = "spawn kitty"
-"Mod"        = "spawn bash -lc  noctalia panel-toggle launcher"
+"Mod"   = "spawn noctalia msg panel-toggle launcher"
 "Mod+Q" = "window-close"
 "Mod+F" = "window-toggle-floating"
 "Mod+B" = "spawn brave"
