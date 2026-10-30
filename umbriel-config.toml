@@ -18,7 +18,7 @@ scale = 1.75
 "Mod"        = "spawn noctalia msg panel-toggle launcher"
 "Mod+Q" = "window-close"
 "Mod+F" = "window-toggle-floating"
-
+"Mod+B" = "spawn brave"
 "Mod+E"       = "spawn dolphin"
 "Mod+Shift+E" = "spawn kitty yazi"
 "Print"       = "spawn env XDG_CURRENT_DESKTOP=sway flameshot gui"

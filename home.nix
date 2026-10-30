@@ -39,12 +39,14 @@
     ColorScheme=BreezeDark
   '';
 
-  # FORCES DOLPHIN INTO THE NATIVE ADWAITA DARK MODE COLOR PROFILE
+  # FORCES DOLPHIN INTO THE NATIVE ADWAITA DARK MODE COLOR PROFILE WITH WHITE TYPOGRAPHY
   xdg.configFile."kdeglobals".text = ''
     [Colors:View]
     BackgroundNormal=30,30,30
     BackgroundAlternate=40,40,40
     ForegroundNormal=255,255,255
+    ForegroundLink=41,128,185
+    ForegroundVisited=127,140,141
 
     [Colors:Window]
     BackgroundNormal=30,30,30
@@ -56,6 +58,10 @@
 
     [Colors:Selection]
     BackgroundNormal=14,112,192
+    ForegroundNormal=255,255,255
+
+    [Colors:Header]
+    BackgroundNormal=35,35,35
     ForegroundNormal=255,255,255
   '';
 
@@ -73,5 +79,27 @@
 
   # Automatically creates a convenient ~/Storage symlink pointing to your LVM drive
   home.file."Storage".source = config.lib.file.mkOutOfStoreSymlink "/mnt/mylm";  
+
+  # FORCES SYSTEMD TO GENERATE AND ENABLE THE ANTEC DISPLAY SERVICE DIRECTLY
+  xdg.configFile."systemd/user/antec-display.service".text = ''
+    [Unit]
+    Description=Antec Flux Pro Case Screen Temp Tracker
+    After=graphical-session.target
+
+    [Service]
+    Type=simple
+    Environment=LD_LIBRARY_PATH=/run/opengl-driver/lib
+    # FIXED: Cleared out the unknown argument so the binary runs cleanly
+    ExecStart=/home/fearless/nixos-config/bin/af-pro-display
+    Restart=always
+    RestartSec=5sec
+
+    [Install]
+    WantedBy=graphical-session.target
+  '';
+
+  # Out-of-store link for the case display config file
+  xdg.configFile."af-pro-display/config.toml".source = 
+    config.lib.file.mkOutOfStoreSymlink "/home/fearless/nixos-config/af-pro-display-config.toml";
 
 }

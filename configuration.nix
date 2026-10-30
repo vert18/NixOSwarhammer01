@@ -6,7 +6,7 @@
 
 {
   # MERGED IMPORTS BLOCK: Combined hardware scan and Umbriel compositor module
-  imports = [ 
+  imports = [
     ./hardware-configuration.nix
     inputs.umbriel.nixosModules.default
   ];
@@ -18,7 +18,7 @@
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
   boot.loader.systemd-boot.configurationLimit = 5;
- 
+
   # VIRTUAL IN-MEMORY SWAP: Fast, compressed block device in your RAM pool
   zramSwap = {
     enable = true;
@@ -26,20 +26,32 @@
     memoryPercent = 50;        # Allocates up to 50% of your RAM space for compression
   };
 
+  # Enable Ollama with native NVIDIA CUDA hardware acceleration
+  services.ollama = {
+    enable = true;
+    package = pkgs.ollama-cuda; # FIXED: Replaced acceleration string with direct CUDA package target
+  };
+
   # Use latest kernel.
   boot.kernelPackages = pkgs.linuxPackages_latest;
-  
+
   # CRUCIAL NVIDIA DRM BOOT FLAGS... fixed waitpid / child process crashes
   boot.kernelParams = [ "nvidia-drm.modeset=1" "nvidia-drm.fbdev=1" ];
 
   services.xserver.videoDrivers = [ "nvidia" ];
   hardware.graphics.enable = true;
 
-  # Correct RTX 5080 module setting 
+  # Correct RTX 5080 module setting
   hardware.nvidia = {
     modesetting.enable = true;
     open = true;
   };
+
+ # Grant unprivileged hardware access to the real Antec Flux Pro LCD hardware signatures
+  services.udev.extraRules = ''
+    SUBSYSTEM=="usb", ATTRS{idVendor}=="2022", ATTRS{idProduct}=="0522", MODE="0666", TAG+="uaccess"
+    SUBSYSTEM=="hidraw", ATTRS{idVendor}=="2022", ATTRS{idProduct}=="0522", MODE="0666", TAG+="uaccess"
+  '';
 
   # Automatically enforce user ownership over the LVM storage mount on boot
   system.activationScripts.mylm-permissions = {
@@ -63,7 +75,7 @@
   # Set up Cachix to grab pre-built binaries securely
   nix.settings = {
     extra-substituters = [
-      "https://umbriel.cachix.org"
+      "https://cachix.org"
     ];
     extra-trusted-public-keys = [
       "umbriel.cachix.org-1:JfNq/2yg2S6D6z4Z2dVSZrZlDPQTKtexB6GAVLD98nw="
@@ -74,7 +86,7 @@
   networking.networkmanager.enable = true;
   hardware.bluetooth.enable = true;
   services.upower.enable = true;
-  services.power-profiles-daemon.enable = true; 
+  services.power-profiles-daemon.enable = true;
 
   # Nvidia specifics: ensure Wayland app compatibility
   environment.sessionVariables = {
@@ -120,8 +132,15 @@
   # Enables the system configuration registry pipeline
   programs.dconf.enable = true;
 
+    # Enable FUSE for AppImages, LMO, and Mod Organizer virtualization layer routing
+  boot.supportedFilesystems = [ "fuse" ];
+  programs.fuse.userAllowOther = true;
+
+  # Ensure 32-bit graphics support is explicitly active for older Wine/Steam titles
+  hardware.graphics.enable32Bit = true;
+
   # System Components and Shell Environment Assets
-  environment.systemPackages = with pkgs; [  
+  environment.systemPackages = with pkgs; [
     gjs                 # Gnome JavaScript bindings for widget processing
     bun                 # Blazing fast JS/TS engine to compile the assets
     kitty               # Blazing fast GPU-Accelerated terminal
@@ -137,13 +156,24 @@
     brightnessctl
     wireplumber
     lxqt.lxqt-policykit
+    fastfetch
+    btop
+    brave
+    protonmail-desktop
+    steam
+    heroic
+    protonup-qt
+    protontricks                 # Crucial winetricks wrapper for Steam games
+    wineWowPackages.unstableFull # Full Wine layer supporting both 32-bit and 64-bit windows binaries
+    winetricks                   # Manual DLL installation helper tool for standalone Wine prefixes
+    steam-run                    # Incredibly helpful utility to run raw binaries inside Steam's environment
+
 
     # THEME ENGINES: Restores missing assets for Dolphin dark mode
     kdePackages.breeze-icons   # Missing icon assets used by dark modes
     kdePackages.breeze         # Core dark rendering assets for Qt6 apps
-    # libsForQt5.breeze-qt5      # Backward compatibility layer 
 
-    # Declarative Vim & Custom global .vimrc profile
+    # Declarative Vim & Custom global .vimrc profile nested directly inside system packages
     (pkgs.vim-full.customize {
        name = "vim";
        vimrcConfig.customRC = ''
@@ -162,6 +192,13 @@
          colorscheme desert
        '';
     })
+  ];
+
+  # HIGH-VISIBILITY TYPOGRAPHY PACKAGES
+  fonts.packages = with pkgs; [
+    nerd-fonts.jetbrains-mono  # Crisp typography with built-in development layout icons
+    nerd-fonts.fira-code       # High-readability font with clear multi-character spacing
+    nerd-fonts.mononoki        # Broad visual width font family, fantastic for eyesight strain
   ];
 
   system.stateVersion = "26.05"; # Did you read the comment?
