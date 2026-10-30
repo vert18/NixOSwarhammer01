@@ -171,30 +171,13 @@
   # ADD THE NOCTALIA PACKAGE FROM FLAKE INPUTS NATIVELY HERE
     inputs.noctalia.packages.${pkgs.system}.default
 
-    # THEME ENGINES: Restores missing assets for Dolphin dark mode
+   # THEME ENGINES: Restores missing assets for Dolphin dark mode
     kdePackages.breeze-icons   # Missing icon assets used by dark modes
     kdePackages.breeze         # Core dark rendering assets for Qt6 apps
 
-    # Declarative Vim & Custom global .vimrc profile nested directly inside system packages
-    (pkgs.vim-full.customize {
-       name = "vim";
-       vimrcConfig.customRC = ''
-         filetype plugin indent on
-         set expandtab
-         set shiftwidth=4
-         set softtabstop=4
-         set tabstop=4
-         set shiftwidth=4
-         set number
-         set relativenumber
-         set smartindent
-         set showmatch
-         set backspace=indent,eol,start
-         syntax on
-         colorscheme desert
-       '';
-    })
-  ];
+  # MODERN ASYNCHRONOUS EDITING ENGINE
+    neovim                     # Replaced legacy vim with full Neovim framework
+  ];    
 
   # HIGH-VISIBILITY TYPOGRAPHY PACKAGES
   fonts.packages = with pkgs; [

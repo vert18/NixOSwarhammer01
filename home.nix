@@ -21,6 +21,10 @@
   xdg.configFile."noctalia/config.toml".source =
     config.lib.file.mkOutOfStoreSymlink "/home/fearless/nixos-config/noctalia-config.toml";
 
+  # Out-of-store flat link for the Yazi file manager core configuration profile
+  xdg.configFile."yazi/yazi.toml".source = 
+    config.lib.file.mkOutOfStoreSymlink "/home/fearless/nixos-config/yazi.toml";
+
   # Write standalone configuration maps forcing Adwaita-dark system-wide
   xdg.configFile."qt5ct/qt5ct.conf".text = ''
     [Appearance]
@@ -74,7 +78,7 @@
 
   # Set Vim as the universal default editor across Yazi and your shell profile
   home.sessionVariables = {
-    EDITOR = "vim";
+    EDITOR = "nvim";
   };
 
   # Automatically creates a convenient ~/Storage symlink pointing to your LVM drive
@@ -102,4 +106,42 @@
   xdg.configFile."af-pro-display/config.toml".source = 
     config.lib.file.mkOutOfStoreSymlink "/home/fearless/nixos-config/af-pro-display-config.toml";
 
+  # DEPLOY NEOVIM WITH LOCAL AI AUTO-SUGGESTIONS BINDINGS
+  programs.neovim = {
+    enable = true;
+    defaultEditor = true;
+    viAlias = true;
+    vimAlias = true;
+    
+    # Restores your high-contrast eye-comfort editor defaults
+    extraConfig = ''
+      syntax on
+      colorscheme desert
+      set number
+      set relativenumber
+      set expandtab
+      set shiftwidth=4
+      set tabstop=4
+      set smartindent
+    '';
+
+    # Automatically fetches the asynchronous local AI compilation plugin
+    plugins = with pkgs.vimPlugins; [
+      {
+        plugin = gen-nvim;
+        type = "lua";
+        config = ''
+          require('gen').setup({
+            model = 'qwen2.5-coder:14b', -- Locks onto your ultra-fast 14B model natively
+            display = true,              -- Streams the code output live right into a split pane
+            show_prompt = true,          -- Displays what the AI is analyzing
+          })
+          
+          -- INSTANT ACCESS HOTKEY: Press 'Space + a' in visual highlight mode to call Qwen
+          vim.keymap.set({'v', 'n'}, '<space>a', ':gen<CR>', { silent = true })
+        '';
+      }
+    ];
+  };
+    
 }
