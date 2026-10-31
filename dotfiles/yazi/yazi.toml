@@ -3,9 +3,21 @@ edit = [
     { run = 'nvim "$1"', block = true, desc = "Open with Neovim" }
 ]
 
+[manager]
+show_hidden = true
+
 [open]
 rules = [
     { url = "*.nix", use = "edit" },
     { url = "*.toml", use = "edit" },
     { mime = "text/*", use = "edit" }
 ]
+
+# FIXED: Placed shortcuts inside their proper keymap block context
+[keymap]
+manager = [
+    { on = [ "d" ], run = "noop", desc = "Disabled default trash shortcut for safety" },
+    { on = [ "D" ], run = "noop", desc = "Disabled default permanent delete shortcut for safety" },
+    { on = [ "<Delete>" ], run = "noop", desc = "Disabled physical delete key for safety" }
+]
+

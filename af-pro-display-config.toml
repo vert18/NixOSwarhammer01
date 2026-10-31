@@ -1,6 +1,0 @@
-polling_interval = 2
-
-[sensor]
-cpu_sensor_type = "hwmon"
-gpu_sensor_type = "nvml"
-

@@ -184,6 +184,24 @@
     });
   };  
 
+  # Enable greetd display manager with the Noctalia Greeter frontend
+  services.greetd = {
+    enable = true;
+    settings = {
+      default_session = {
+        # FIXED: Directly references the official nixpkgs package and its native session runner
+        command = "${pkgs.noctalia-greeter}/bin/noctalia-greeter-session";
+        user = "greeter";
+      };
+    };
+  };
+
+  # Replicates your exact TTY workflow automatically after you log in
+  environment.etc."greetd/environments".text = ''
+    dbus-run-session umbriel
+    hyprland
+  '';
+  
   # Ensure 32-bit graphics support is explicitly active for older Wine/Steam titles
   hardware.graphics.enable32Bit = true;
 
