@@ -15,15 +15,22 @@
 
   # 2. Tell Home Manager to link to normal, writeable files in your config directory
   # This lets you edit themes, scales, and windows on the fly without running rebuilds!
-  xdg.configFile."umbriel/config.toml".source =
-    config.lib.file.mkOutOfStoreSymlink "/home/fearless/nixos-config/umbriel-config.toml";
+  # xdg.configFile."umbriel/config.toml".source =
+  #  config.lib.file.mkOutOfStoreSymlink "/home/fearless/nixos-config/umbriel-config.toml";
+  #
+  # xdg.configFile."noctalia/config.toml".source =
+  #  config.lib.file.mkOutOfStoreSymlink "/home/fearless/nixos-config/noctalia-config.toml";
+  #
+  #  Out-of-store flat link for the Yazi file manager core configuration profile
+  # xdg.configFile."yazi/yazi.toml".source = 
+  #  config.lib.file.mkOutOfStoreSymlink "/home/fearless/nixos-config/yazi.toml";
 
-  xdg.configFile."noctalia/config.toml".source =
-    config.lib.file.mkOutOfStoreSymlink "/home/fearless/nixos-config/noctalia-config.toml";
-
-  # Out-of-store flat link for the Yazi file manager core configuration profile
-  xdg.configFile."yazi/yazi.toml".source = 
-    config.lib.file.mkOutOfStoreSymlink "/home/fearless/nixos-config/yazi.toml";
+ xdg.configFile = {
+    "umbriel/config.toml".source = ./dotfiles/umbriel/umbriel-config.toml;
+    "umbriel/display-config.toml".source = ./dotfiles/umbriel/af-pro-display-config.toml;
+    "noctalia/config.toml".source = ./dotfiles/noctalia/noctalia-config.toml;
+    "yazi/yazi.toml".source = ./dotfiles/yazi/yazi.toml;
+  };
 
   # Write standalone configuration maps forcing Adwaita-dark system-wide
   xdg.configFile."qt5ct/qt5ct.conf".text = ''
