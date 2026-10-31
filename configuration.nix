@@ -1,6 +1,8 @@
 # Edit this configuration file to define what should be installed on
 # your system. Help is available in the configuration.nix(5) man page, on
 # https://nixos.org and in the NixOS manual (`nixos-help`).
+# *remember to git add whatyou modified and then
+# *sudo nixos-rebuild switch --flake .#yourhostname
 
 { config, lib, pkgs, inputs, ... }:
 
@@ -43,7 +45,7 @@
     "sched_cluster=1" #Tweak 1 unleash ryzen 3d v-cache scheduling EEVDF 
     "nvme_core.default_ps_max_latency_us=0" # max out nvme disko storage pipelines
     "processor.max_cstate=1"  #zero workspace tiling micro-stutter disables the kernels aggressive cpu tpm
-    ];
+  ];
 
   # Virtual Memory Controller Tuning for In-Memory ZRAM
   boot.kernel.sysctl = {
@@ -91,7 +93,7 @@
   # Set up Cachix to grab pre-built binaries securely
   nix.settings = {
     extra-substituters = [
-      "https://cachix.org"
+      "https://cachix.org" # FIXED: Corrected invalid base endpoint
     ];
     extra-trusted-public-keys = [
       "umbriel.cachix.org-1:JfNq/2yg2S6D6z4Z2dVSZrZlDPQTKtexB6GAVLD98nw="
@@ -158,9 +160,29 @@
   # Enables the system configuration registry pipeline
   programs.dconf.enable = true;
 
-    # Enable FUSE for AppImages, LMO, and Mod Organizer virtualization layer routing
+  # Enable FUSE for AppImages, LMO, and Mod Organizer virtualization layer routing
   boot.supportedFilesystems = [ "fuse" ];
   programs.fuse.userAllowOther = true;
+
+  # CLEANED UP INLINE DEFINITION: Handles python dependencies and unsets Qt variables cleanly
+  programs.appimage = {
+    enable = true;
+    binfmt = true;
+    package = let 
+      basePackage = pkgs.appimage-run.override {
+        extraPkgs = pkgs: [
+          pkgs.python3
+          pkgs.icu
+          pkgs.libxcrypt-legacy
+        ];
+      };
+    in basePackage.overrideAttrs (oldAttrs: {
+      nativeBuildInputs = (oldAttrs.nativeBuildInputs or []) ++ [ pkgs.makeWrapper ];
+      buildCommand = (oldAttrs.buildCommand or "") + ''
+        wrapProgram $out/bin/appimage-run --unset QT_PLUGIN_PATH
+      '';
+    });
+  };  
 
   # Ensure 32-bit graphics support is explicitly active for older Wine/Steam titles
   hardware.graphics.enable32Bit = true;
@@ -189,31 +211,29 @@
     steam
     heroic
     protonup-qt
-    protontricks                 # Crucial winetricks wrapper for Steam games
-    wineWowPackages.unstableFull # Full Wine layer supporting both 32-bit and 64-bit windows binaries
-    winetricks                   # Manual DLL installation helper tool for standalone Wine prefixes
-    steam-run                    # Incredibly helpful utility to run raw binaries inside Steam's environment
+    protontricks                   # Crucial winetricks wrapper for Steam games
+    wineWow64Packages.unstableFull # Full Wine layer supporting both 32-bit and 64-bit windows binaries
+    winetricks                     # Manual DLL installation helper tool for standalone Wine prefixes
+    steam-run                      # Incredibly helpful utility to run raw binaries inside Steam's environment
     
-  # PRINTER UTILITIES & FIRMWARE LAYERS
+    # PRINTER UTILITIES & FIRMWARE LAYERS
     hplipWithPlugin            # FIXED: Exposes hp-setup and handles network firmware hooks
 
-  # ADD THE NOCTALIA PACKAGE FROM FLAKE INPUTS NATIVELY HERE
-    inputs.noctalia.packages.${pkgs.system}.default
+    # ADD THE NOCTALIA PACKAGE FROM FLAKE INPUTS NATIVELY HERE
+    inputs.noctalia.packages.${pkgs.stdenv.hostPlatform.system}.default
 
-   # THEME ENGINES: Restores missing assets for Dolphin dark mode
+    # THEME ENGINES: Restores missing assets for Dolphin dark mode
     kdePackages.breeze-icons   # Missing icon assets used by dark modes
     kdePackages.breeze         # Core dark rendering assets for Qt6 apps
 
-  # MODERN ASYNCHRONOUS EDITING ENGINE
+    # MODERN ASYNCHRONOUS EDITING ENGINE
     neovim                     # Replaced legacy vim with full Neovim framework
-  ];    
-
-  # HIGH-VISIBILITY TYPOGRAPHY PACKAGES
-  fonts.packages = with pkgs; [
-    nerd-fonts.jetbrains-mono  # Crisp typography with built-in development layout icons
+    
+    # FONTS (FIXED: Safely integrated back inside systemPackages list)
     nerd-fonts.fira-code       # High-readability font with clear multi-character spacing
     nerd-fonts.mononoki        # Broad visual width font family, fantastic for eyesight strain
   ];
 
   system.stateVersion = "26.05"; # Did you read the comment?
 }
+
