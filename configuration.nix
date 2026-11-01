@@ -21,27 +21,34 @@
       };
   };
 
-nixpkgs.config.packageOverrides = pkgs: {
-  python3 = pkgs.python3.override {
-    packageOverrides = self: super: {
-      # 1. Pinned MCP version to solve open-webui startup crash
-      mcp = super.mcp.overridePythonAttrs (oldAttrs: rec {
-        version = "1.3.0";
-        src = pkgs.fetchFromGitHub {
-          owner = "modelcontextprotocol";
-          repo = "python-sdk";
-          rev = "v${version}";
-          hash = "sha256-R47vG2S5lB1XszD6m8TvCTvDkgOHSKSQ8XJKUV0=";
-        };
+nixpkgs.overlays = [
+  (final: prev: {
+    python314Packages = prev.python314Packages.overrideScope (pythonFinal: pythonPrev: {
+      # Patch the standard mcp package to provide backward-compatible function naming
+      mcp = pythonPrev.mcp.overridePythonAttrs (oldAttrs: {
+        postPatch = (oldAttrs.postPatch or "") + ''
+          echo "streamablehttp_client = streamable_http_client" >> src/mcp/client/streamable_http.py
+        '';
       });
 
-      # 2. Skip posthog's test suite since its tests break with mcp 1.x
-      posthog = super.posthog.overridePythonAttrs (oldAttrs: {
+      posthog = pythonPrev.posthog.overridePythonAttrs (oldAttrs: {
         doCheck = false;
       });
-    };
-  };
-};  
+    });
+
+    python3Packages = prev.python3Packages.overrideScope (pythonFinal: pythonPrev: {
+      mcp = pythonPrev.mcp.overridePythonAttrs (oldAttrs: {
+        postPatch = (oldAttrs.postPatch or "") + ''
+          echo "streamablehttp_client = streamable_http_client" >> src/mcp/client/streamable_http.py
+        '';
+      });
+
+      posthog = pythonPrev.posthog.overridePythonAttrs (oldAttrs: {
+        doCheck = false;
+      });
+    });
+  })
+];
 
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
