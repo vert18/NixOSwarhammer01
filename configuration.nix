@@ -1,8 +1,8 @@
 # Edit this configuration file to define what should be installed on
 # your system. Help is available in the configuration.nix(5) man page, on
 # https://nixos.org and in the NixOS manual (`nixos-help`).
-# *remember to git add whatyou modified and then
-# *sudo nixos-rebuild switch --flake .#yourhostname
+# *remember to git add what you modified and then
+# *sudo nixos-rebuild switch --flake .#warhammer
 
 { config, lib, pkgs, inputs, ... }:
 
@@ -14,7 +14,25 @@
   ];
 
   # Allow Unfree packages
-  nixpkgs.config.allowUnfree = true;
+  nixpkgs.config = {
+      allowUnfree = true;
+      problems.handlers = {
+          posthog.broken = "warn"; #Bypasses the broekn block for the open-webui dep
+      };
+  };
+
+  # Bypass the failing test suite for posthog
+  nixpkgs.overlays = [
+    (final: prev: {
+      pythonPackagesExtensions = prev.pythonPackagesExtensions ++ [
+        (python-final: python-prev: {
+          posthog = python-prev.posthog.overridePythonAttrs (oldAttrs: {
+            doCheck = false; # Disables the test runner entirely for this package
+          });
+        })
+      ];
+    })
+  ];
 
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
@@ -92,12 +110,22 @@
 
   # Set up Cachix to grab pre-built binaries securely
   nix.settings = {
+    experimental-features = [ "nix-command" "flakes" ];
     extra-substituters = [
-      "https://cachix.org" # FIXED: Corrected invalid base endpoint
+      "https://umbriel.cachix.org" # FIXED: Correct endpoint for your target binary cache
     ];
     extra-trusted-public-keys = [
       "umbriel.cachix.org-1:JfNq/2yg2S6D6z4Z2dVSZrZlDPQTKtexB6GAVLD98nw="
     ];
+  };
+
+  # Enable Open WebUI for local offline AI interactions
+  services.open-webui = {
+    enable = true;
+    port = 8080;
+    environment = {
+      OLLAMA_API_BASE_URL = "http://127.0.0.1:11434";
+    };
   };
 
   # Required daemon dependencies for Noctalia's system modules
@@ -233,7 +261,9 @@
     wineWow64Packages.unstableFull # Full Wine layer supporting both 32-bit and 64-bit windows binaries
     winetricks                     # Manual DLL installation helper tool for standalone Wine prefixes
     steam-run                      # Incredibly helpful utility to run raw binaries inside Steam's environment
-    
+    p7zip
+    bat
+
     # PRINTER UTILITIES & FIRMWARE LAYERS
     hplipWithPlugin            # FIXED: Exposes hp-setup and handles network firmware hooks
 

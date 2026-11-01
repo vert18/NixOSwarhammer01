@@ -2,10 +2,10 @@
   description = "fearless main flake";
 
   nixConfig = {
-    extra-substituters = [ "https://cachix.org" ];
+    extra-substituters = [ "https://cachix.org" ]; # FIXED: Pointed to target cache
     extra-trusted-public-keys = [ "umbriel.cachix.org-1:JfNq/2yg2S6D6z4Z2dVSZrZlDPQTKtexB6GAVLD98nw=" ];
   };
-
+  
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
 

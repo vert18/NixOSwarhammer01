@@ -150,5 +150,13 @@
       }
     ];
   };
-    
+
+  # QUICK BUILD ALIASES
+  programs.bash = {
+    enable = true;
+    shellAliases = {
+      remake = "cd ~/nixos-config && git add . && sudo nixos-rebuild switch --flake .#warhammer";
+    };
+  };
+
 }
