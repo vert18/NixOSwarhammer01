@@ -21,21 +21,27 @@
       };
   };
 
-  nixpkgs.config.packageOverrides = pkgs: {
-    python3 = pkgs.python3.override {
-      packageOverrides = self: super: {
-        mcp = super.mcp.overridePythonAttrs (oldAttrs: rec {
-          version = "1.3.0";
-          src = pkgs.fetchFromGitHub {
-            owner = "modelcontextprotocol";
-            repo = "python-sdk";
-            rev = "v${version}";
-            hash = "sha256-R47vG2S5lB1XszD6m8TvCTvDkgOHSKSQ8XJKUV0="; # Nix will tell you if this hash needs adjustment
-          };
-        });
-       };
-      };
-     };  
+nixpkgs.config.packageOverrides = pkgs: {
+  python3 = pkgs.python3.override {
+    packageOverrides = self: super: {
+      # 1. Pinned MCP version to solve open-webui startup crash
+      mcp = super.mcp.overridePythonAttrs (oldAttrs: rec {
+        version = "1.3.0";
+        src = pkgs.fetchFromGitHub {
+          owner = "modelcontextprotocol";
+          repo = "python-sdk";
+          rev = "v${version}";
+          hash = "sha256-R47vG2S5lB1XszD6m8TvCTvDkgOHSKSQ8XJKUV0=";
+        };
+      });
+
+      # 2. Skip posthog's test suite since its tests break with mcp 1.x
+      posthog = super.posthog.overridePythonAttrs (oldAttrs: {
+        doCheck = false;
+      });
+    };
+  };
+};  
 
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
