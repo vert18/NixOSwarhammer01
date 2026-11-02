@@ -259,7 +259,6 @@ nixpkgs.overlays = [
     libnotify           # Notification transmission protocol
     firefox
     discord
-    kdePackages.dolphin
     yazi
     flameshot
     wl-clipboard
@@ -278,7 +277,10 @@ nixpkgs.overlays = [
     winetricks                     # Manual DLL installation helper tool for standalone Wine prefixes
     steam-run                      # Incredibly helpful utility to run raw binaries inside Steam's environment
     p7zip
+    unrar
     bat
+    doublecmd
+    fzf
 
     # PRINTER UTILITIES & FIRMWARE LAYERS
     hplipWithPlugin            # FIXED: Exposes hp-setup and handles network firmware hooks
