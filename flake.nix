@@ -15,6 +15,12 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # 1. ADD HELIUM TO INPUTS
+    helium = {
+      url = "github:oxcl/nix-flake-helium-browser";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     umbriel.url = "github:noctalia-dev/umbriel";
     noctalia = {
       url = "github:noctalia-dev/noctalia";
@@ -26,13 +32,24 @@
     };
   };
 
-  outputs = { self, nixpkgs, disko, umbriel, noctalia, home-manager, ... }@inputs: {
+  outputs = { self, nixpkgs, disko, helium, umbriel, noctalia, home-manager, ... }@inputs: {
     nixosConfigurations.warhammer = nixpkgs.lib.nixosSystem {
       specialArgs = { inherit inputs; };
       modules = [
         # IMPORT THE DISKO MODULE AND YOUR DISKO TARGET FILE HERE
         disko.nixosModules.disko
         ./disko-config.nix
+
+        # 3. ADD THE HELIUM MODULE AND CONFIGURATION
+        helium.nixosModules.default
+        {
+          nixpkgs.overlays = [ helium.overlays.default ];
+          programs.helium = {
+            enable = true;
+            # Optional flags (e.g., for Wayland support)
+            flags = [ "--ozone-platform-hint=auto" ];
+          };
+        }
 
         ./configuration.nix
         home-manager.nixosModules.home-manager {

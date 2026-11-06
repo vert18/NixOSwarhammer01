@@ -79,6 +79,7 @@ nixpkgs.overlays = [
     "sched_cluster=1" #Tweak 1 unleash ryzen 3d v-cache scheduling EEVDF 
     "nvme_core.default_ps_max_latency_us=0" # max out nvme disko storage pipelines
     "processor.max_cstate=1"  #zero workspace tiling micro-stutter disables the kernels aggressive cpu tpm
+    "usbcore.quirks=28e9:31e2:g"  #Fix for Ducky OK-HE input interrupt endpoint drive clash
   ];
 
   # Virtual Memory Controller Tuning for In-Memory ZRAM
@@ -103,6 +104,8 @@ nixpkgs.overlays = [
   services.udev.extraRules = ''
     SUBSYSTEM=="usb", ATTRS{idVendor}=="2022", ATTRS{idProduct}=="0522", MODE="0666", TAG+="uaccess"
     SUBSYSTEM=="hidraw", ATTRS{idVendor}=="2022", ATTRS{idProduct}=="0522", MODE="0666", TAG+="uaccess"
+    KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="28e9", ATTRS{idProduct}=="31e2", MODE="0666", TAG+="uaccess"
+    KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="3233", MODE="0666", TAG+="uaccess"
   '';
 
   # Automatically enforce user ownership over the LVM storage mount on boot
@@ -281,6 +284,8 @@ nixpkgs.overlays = [
     bat
     doublecmd
     fzf
+    solaar
+    wget
 
     # PRINTER UTILITIES & FIRMWARE LAYERS
     hplipWithPlugin            # FIXED: Exposes hp-setup and handles network firmware hooks
