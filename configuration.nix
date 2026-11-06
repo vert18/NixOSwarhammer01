@@ -243,6 +243,7 @@
     fzf
     solaar
     wget
+    aichat
 
     # PRINTER UTILITIES & FIRMWARE LAYERS
     hplipWithPlugin            # FIXED: Exposes hp-setup and handles network firmware hooks
