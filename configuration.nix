@@ -14,41 +14,7 @@
   ];
 
   # Allow Unfree packages
-  nixpkgs.config = {
-      allowUnfree = true;
-      problems.handlers = {
-          posthog.broken = "warn"; #Bypasses the broekn block for the open-webui dep
-      };
-  };
-
-nixpkgs.overlays = [
-  (final: prev: {
-    python314Packages = prev.python314Packages.overrideScope (pythonFinal: pythonPrev: {
-      # Patch the standard mcp package to provide backward-compatible function naming
-      mcp = pythonPrev.mcp.overridePythonAttrs (oldAttrs: {
-        postPatch = (oldAttrs.postPatch or "") + ''
-          echo "streamablehttp_client = streamable_http_client" >> src/mcp/client/streamable_http.py
-        '';
-      });
-
-      posthog = pythonPrev.posthog.overridePythonAttrs (oldAttrs: {
-        doCheck = false;
-      });
-    });
-
-    python3Packages = prev.python3Packages.overrideScope (pythonFinal: pythonPrev: {
-      mcp = pythonPrev.mcp.overridePythonAttrs (oldAttrs: {
-        postPatch = (oldAttrs.postPatch or "") + ''
-          echo "streamablehttp_client = streamable_http_client" >> src/mcp/client/streamable_http.py
-        '';
-      });
-
-      posthog = pythonPrev.posthog.overridePythonAttrs (oldAttrs: {
-        doCheck = false;
-      });
-    });
-  })
-];
+  nixpkgs.config.allowUnfree = true;
 
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
@@ -136,15 +102,6 @@ nixpkgs.overlays = [
     extra-trusted-public-keys = [
       "umbriel.cachix.org-1:JfNq/2yg2S6D6z4Z2dVSZrZlDPQTKtexB6GAVLD98nw="
     ];
-  };
-
-  # Enable Open WebUI for local offline AI interactions
-  services.open-webui = {
-    enable = true;
-    port = 8080;
-    environment = {
-      OLLAMA_API_BASE_URL = "http://127.0.0.1:11434";
-    };
   };
 
   # Required daemon dependencies for Noctalia's system modules
