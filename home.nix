@@ -83,6 +83,7 @@
     # Terminal & Command-Line Shell Utilities
     kitty # Your core fast GPU-accelerated terminal
     fzf # Interactive fuzzy finder utility
+    eza
     bat # High-contrast syntax highlighting cat clone
     btop # High-contrast interactive system process monitor
     fastfetch # Clean modern system specification fetch layout
@@ -293,6 +294,9 @@
     enable = true;
     shellAliases = {
       remake = "cd ~/nixos-config && git add -A && sudo nixos-rebuild switch --flake .#warhammer";
+      ls = "eza --color=always --icons=always --group-directories-first";
+      la = "eza -la --color=always --icons=always --group-directories-first";
+      lt = "eza --tree --color=always --icons=always --group-directories-first"; # Displays folder structures as clean trees!
     };
   };
 }
