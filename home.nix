@@ -1,4 +1,10 @@
-{ inputs, pkgs, config, ... }: {
+{
+  inputs,
+  pkgs,
+  config,
+  ...
+}:
+{
 
   home.username = "fearless";
   home.homeDirectory = "/home/fearless";
@@ -14,18 +20,7 @@
   programs.noctalia.enable = false;
 
   # 2. Tell Home Manager to link to normal, writeable files in your config directory
-  # This lets you edit themes, scales, and windows on the fly without running rebuilds!
-  # xdg.configFile."umbriel/config.toml".source =
-  #  config.lib.file.mkOutOfStoreSymlink "/home/fearless/nixos-config/umbriel-config.toml";
-  #
-  # xdg.configFile."noctalia/config.toml".source =
-  #  config.lib.file.mkOutOfStoreSymlink "/home/fearless/nixos-config/noctalia-config.toml";
-  #
-  #  Out-of-store flat link for the Yazi file manager core configuration profile
-  # xdg.configFile."yazi/yazi.toml".source = 
-  #  config.lib.file.mkOutOfStoreSymlink "/home/fearless/nixos-config/yazi.toml";
-
- xdg.configFile = {
+  xdg.configFile = {
     "umbriel/config.toml".source = ./dotfiles/umbriel/umbriel-config.toml;
     "umbriel/display-config.toml".source = ./dotfiles/umbriel/af-pro-display-config.toml;
     "noctalia/config.toml".source = ./dotfiles/noctalia/noctalia-config.toml;
@@ -83,13 +78,55 @@
     };
   };
 
+  # User Workspace Applications Layer
+  home.packages = with pkgs; [
+    # Terminal & Command-Line Shell Utilities
+    kitty # Your core fast GPU-accelerated terminal
+    fzf # Interactive fuzzy finder utility
+    bat # High-contrast syntax highlighting cat clone
+    btop # High-contrast interactive system process monitor
+    fastfetch # Clean modern system specification fetch layout
+    wl-clipboard # Native wayland clipboard copy/paste utilities
+    libnotify # Wayland background system notification daemon
+
+    # File Managers & Desktop Management Tools
+    doublecmd # Double Commander file manager (with Kitty/VSCodium integrations)
+    yazi # Fast asynchronous terminal file browser
+    flameshot # Desktop snapshot/screengrab selection interface
+    networkmanagerapplet # Graphical network management utility tray panel
+    lxqt.lxqt-policykit # Handles administrative visual authentication loops
+
+    # Communication & General Applications
+    firefox # Primary web browser
+    brave # Secondary privacy browser
+    discord # Messaging platform
+    protonmail-desktop # Dedicated desktop client application
+    # vscodium # Your streamlined asynchronous IDE workspace
+
+    # Development & Script Compilation Layers
+    gjs # Gnome JavaScript platform bindings
+    bun # Extremely fast JS/TS bundler engine
+    aichat # Fast command-line local chat companion app
+
+    # Gaming Frameworks, Launchers & Runners
+    steam # Native Linux gaming storefront architecture
+    heroic # Open-source launcher for Epic, GOG, and Amazon titles
+    protonup-qt # Graphical management tool for custom Proton-GE layers
+    protontricks # Essential automated runtime script engine for Wine prefixes
+    wineWow64Packages.unstableFull # Comprehensive layers handling 32/64 bit system titles
+    winetricks # Manual DLL dependencies component modifier tools
+    steam-run # Isolates and executes standalone unmanaged binaries natively
+    p7zip # Multi-format deep archive compression engine
+    unrar # Archive extraction dependency tools
+  ];
+
   # Set Vim as the universal default editor across Yazi and your shell profile
   home.sessionVariables = {
     EDITOR = "nvim";
   };
 
   # Automatically creates a convenient ~/Storage symlink pointing to your LVM drive
-  home.file."Storage".source = config.lib.file.mkOutOfStoreSymlink "/mnt/mylm";  
+  home.file."Storage".source = config.lib.file.mkOutOfStoreSymlink "/mnt/mylm";
 
   # FORCES SYSTEMD TO GENERATE AND ENABLE THE ANTEC DISPLAY SERVICE DIRECTLY
   xdg.configFile."systemd/user/antec-display.service".text = ''
@@ -100,7 +137,6 @@
     [Service]
     Type=simple
     Environment=LD_LIBRARY_PATH=/run/opengl-driver/lib
-    # FIXED: Cleared out the unknown argument so the binary runs cleanly
     ExecStart=/home/fearless/nixos-config/bin/af-pro-display
     Restart=always
     RestartSec=5sec
@@ -110,7 +146,7 @@
   '';
 
   # Out-of-store link for the case display config file
-  xdg.configFile."af-pro-display/config.toml".source = 
+  xdg.configFile."af-pro-display/config.toml".source =
     config.lib.file.mkOutOfStoreSymlink "/home/fearless/nixos-config/af-pro-display-config.toml";
 
   # DEPLOY NEOVIM WITH LOCAL AI AUTO-SUGGESTIONS BINDINGS
@@ -119,7 +155,7 @@
     defaultEditor = true;
     viAlias = true;
     vimAlias = true;
-    
+
     # Restores your high-contrast eye-comfort editor defaults
     extraConfig = ''
       syntax on
@@ -132,7 +168,7 @@
       set smartindent
     '';
 
-    # Automatically fetches the asynchronous local AI compilation plugin
+    # Automatically fetches local AI integration modules
     plugins = with pkgs.vimPlugins; [
       {
         plugin = gen-nvim;
@@ -143,20 +179,119 @@
             display = true,              -- Streams the code output live right into a split pane
             show_prompt = true,          -- Displays what the AI is analyzing
           })
-          
+
           -- INSTANT ACCESS HOTKEY: Press 'Space + a' in visual highlight mode to call Qwen
           vim.keymap.set({'v', 'n'}, '<space>a', ':gen<CR>', { silent = true })
         '';
       }
+
+      # NEW: Separate, isolated configuration block for gp-nvim mapping to your llama3 core
+      {
+        plugin = pkgs.vimUtils.buildVimPlugin {
+          pname = "gp.nvim";
+          version = "latest";
+          src = pkgs.fetchFromGitHub {
+            owner = "Robitx";
+            repo = "gp.nvim";
+            rev = "b32327fe4ee65d24acbab0f645747c113eb935c0";
+            sha256 = "sha256-obYQyy1aHQXdf23NRNe8EPleP8KtKSisijgAQ7Ckkzo=";
+          };
+        };
+        type = "lua";
+        config = ''
+          require("gp").setup({
+            default_chat_agent = "LocalChat",
+            default_command_agent = "LocalCode",
+            
+            providers = {
+              openai = {
+                disable = false,
+                endpoint = "http://127.0.0",
+                secret = "dummy_secret",
+              },
+              copilot = { disable = true },
+              anthropic = { disable = true },
+              googleai = { disable = true },
+              ollama = { disable = true },
+            },
+            agents = {
+              {
+                name = "LocalChat",
+                chat = true,
+                command = false,
+                provider = "openai",
+                model = { model = "llama3:latest" },
+                system_prompt = "You are a helpful, concise local AI assistant.",
+              },
+              {
+                name = "LocalCode",
+                chat = false,
+                command = true,
+                provider = "openai",
+                model = { model = "qwen2.5-coder:14b" },
+                system_prompt = "You are an expert AI programmer. Output only code changes.",
+              },
+            },
+          })
+
+          -- HOTKEYS: Side chat pane via Ctrl+G+C, and inline code injection changes via Ctrl+G+R
+          vim.keymap.set({"n", "i"}, "<C-g>c", "<cmd>GpChatToggle<cr>", { silent = true })
+          vim.keymap.set("v", "<C-g>r", ":<C-u>'<,'>GpRewrite<cr>", { silent = true })
+        '';
+      }
+
     ];
   };
+
+  programs.vscodium = {
+    enable = true;
+
+    # FIXED: Wrapped extensions and settings under the default profile block
+    profiles.default = {
+      extensions = with pkgs.vscode-extensions; [
+        jnoortheen.nix-ide
+      ];
+
+      # This replaces your manual settings.json file entirely!
+      userSettings = {
+        # "editor.fontFamily" = "'Fira Code Nerd Font', 'mononoki Nerd Font', monospace";
+        "editor.fontFamily" = "'Fira Code Nerd Font', monospace";
+        # "editor.fontFamily" = "'mononoki Nerd Font', monospace";
+        "editor.fontLigatures" = true;
+
+        "nix.enableLanguageServer" = true;
+        "nix.serverPath" = "nixd";
+        "nix.serverSettings" = {
+          "nixd" = {
+            "formatting" = {
+              "command" = [ "nixfmt" ];
+            };
+            "nixos" = {
+              "expr" =
+                "import (builtins.getFlake \"/home/fearless/nixos-config\").nixosConfigurations.warhammer.options";
+            };
+            "home-manager" = {
+              "expr" =
+                "import (builtins.getFlake \"/home/fearless/nixos-config\").homeConfigurations.fearless.options";
+            };
+          };
+        };
+
+        # Auto-formatting preferences
+        "editor.formatOnSave" = true;
+        "[nix]" = {
+          "editor.defaultFormatter" = "jnoortheen.nix-ide";
+          "editor.formatOnSave" = true;
+        };
+      };
+    };
+  }; # lol
 
   # QUICK BUILD ALIASES
   programs.bash = {
     enable = true;
     shellAliases = {
-      remake = "cd ~/nixos-config && git add . && sudo nixos-rebuild switch --flake .#warhammer";
+      remake = "cd ~/nixos-config && git add -A && sudo nixos-rebuild switch --flake .#warhammer";
     };
   };
-
 }

@@ -4,7 +4,13 @@
 # *remember to git add what you modified and then
 # *sudo nixos-rebuild switch --flake .#warhammer
 
-{ config, lib, pkgs, inputs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  inputs,
+  ...
+}:
 
 {
   # MERGED IMPORTS BLOCK: Combined hardware scan and Umbriel compositor module
@@ -24,8 +30,8 @@
   # VIRTUAL IN-MEMORY SWAP: Fast, compressed block device in your RAM pool
   zramSwap = {
     enable = true;
-    algorithm = "zstd";        # Fast memory compression
-    memoryPercent = 50;        # Allocates up to 50% of your RAM space for compression
+    algorithm = "zstd"; # Fast memory compression
+    memoryPercent = 50; # Allocates up to 50% of your RAM space for compression
   };
 
   # Enable Ollama with native NVIDIA CUDA hardware acceleration
@@ -38,21 +44,21 @@
   boot.kernelPackages = pkgs.linuxPackages_latest;
 
   # CRUCIAL NVIDIA DRM BOOT FLAGS... fixed waitpid / child process crashes
-  boot.kernelParams = [ 
-    "nvidia-drm.modeset=1" 
+  boot.kernelParams = [
+    "nvidia-drm.modeset=1"
     "nvidia-drm.fbdev=1"
     "loglevel=3"
-    "sched_cluster=1" #Tweak 1 unleash ryzen 3d v-cache scheduling EEVDF 
+    "sched_cluster=1" # Tweak 1 unleash ryzen 3d v-cache scheduling EEVDF
     "nvme_core.default_ps_max_latency_us=0" # max out nvme disko storage pipelines
-    "processor.max_cstate=1"  #zero workspace tiling micro-stutter disables the kernels aggressive cpu tpm
-    "usbcore.quirks=28e9:31e2:g"  #Fix for Ducky OK-HE input interrupt endpoint drive clash
+    "processor.max_cstate=1" # zero workspace tiling micro-stutter disables the kernels aggressive cpu tpm
+    "usbcore.quirks=28e9:31e2:g" # Fix for Ducky OK-HE input interrupt endpoint drive clash
   ];
 
   # Virtual Memory Controller Tuning for In-Memory ZRAM
   boot.kernel.sysctl = {
     # Aggressively offload idle memory blocks into compressed ZRAM cache early
     "vm.swappiness" = 100;
-    
+
     # Keeps your file manager directory navigation (Yazi) instantly cached in memory
     "vm.vfs_cache_pressure" = 50;
   };
@@ -66,10 +72,11 @@
     open = true;
   };
 
- # Grant unprivileged hardware access to the real Antec Flux Pro LCD hardware signatures
+  # Grant unprivileged hardware access to the real Antec Flux Pro LCD hardware signatures
   services.udev.extraRules = ''
     SUBSYSTEM=="usb", ATTRS{idVendor}=="2022", ATTRS{idProduct}=="0522", MODE="0666", TAG+="uaccess"
     SUBSYSTEM=="hidraw", ATTRS{idVendor}=="2022", ATTRS{idProduct}=="0522", MODE="0666", TAG+="uaccess"
+    KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c0a9", MODE="0666", TAG+="uaccess"
     KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="28e9", ATTRS{idProduct}=="31e2", MODE="0666", TAG+="uaccess"
     KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="3233", MODE="0666", TAG+="uaccess"
   '';
@@ -81,7 +88,7 @@
       chown -R fearless:users /mnt/mylm
       chmod -R u+rwX,g+rX,o-rwx /mnt/mylm
     '';
-    deps = [];
+    deps = [ ];
   };
 
   # Enable Hyprland Natively
@@ -95,7 +102,10 @@
 
   # Set up Cachix to grab pre-built binaries securely
   nix.settings = {
-    experimental-features = [ "nix-command" "flakes" ];
+    experimental-features = [
+      "nix-command"
+      "flakes"
+    ];
     extra-substituters = [
       "https://umbriel.cachix.org" # FIXED: Correct endpoint for your target binary cache
     ];
@@ -127,15 +137,15 @@
 
   # Enable CUPS to print documents.
   services.printing = {
-      enable = true;
-      drivers = [ pkgs.hplip ];
+    enable = true;
+    drivers = [ pkgs.hplip ];
   };
 
   # AUTOMATIC WIRELESS PRINTER DISCOVERY (mDNS / Bonjour routing)
   services.avahi = {
     enable = true;
-    nssmdns4 = true;          # Allows the system to resolve the printer's network name
-    openFirewall = true;      # Automatically opens network discovery ports in your firewall
+    nssmdns4 = true; # Allows the system to resolve the printer's network name
+    openFirewall = true; # Automatically opens network discovery ports in your firewall
   };
 
   # Enable sound.
@@ -172,21 +182,23 @@
   programs.appimage = {
     enable = true;
     binfmt = true;
-    package = let 
-      basePackage = pkgs.appimage-run.override {
-        extraPkgs = pkgs: [
-          pkgs.python3
-          pkgs.icu
-          pkgs.libxcrypt-legacy
-        ];
-      };
-    in basePackage.overrideAttrs (oldAttrs: {
-      nativeBuildInputs = (oldAttrs.nativeBuildInputs or []) ++ [ pkgs.makeWrapper ];
-      buildCommand = (oldAttrs.buildCommand or "") + ''
-        wrapProgram $out/bin/appimage-run --unset QT_PLUGIN_PATH
-      '';
-    });
-  };  
+    package =
+      let
+        basePackage = pkgs.appimage-run.override {
+          extraPkgs = pkgs: [
+            pkgs.python3
+            pkgs.icu
+            pkgs.libxcrypt-legacy
+          ];
+        };
+      in
+      basePackage.overrideAttrs (oldAttrs: {
+        nativeBuildInputs = (oldAttrs.nativeBuildInputs or [ ]) ++ [ pkgs.makeWrapper ];
+        buildCommand = (oldAttrs.buildCommand or "") + ''
+          wrapProgram $out/bin/appimage-run --unset QT_PLUGIN_PATH
+        '';
+      });
+  };
 
   # Enable greetd display manager with the Noctalia Greeter frontend
   services.greetd = {
@@ -205,64 +217,35 @@
     dbus-run-session umbriel
     hyprland
   '';
-  
+
   # Ensure 32-bit graphics support is explicitly active for older Wine/Steam titles
   hardware.graphics.enable32Bit = true;
 
   # System Components and Shell Environment Assets
   environment.systemPackages = with pkgs; [
-    gjs                 # Gnome JavaScript bindings for widget processing
-    bun                 # Blazing fast JS/TS engine to compile the assets
-    kitty               # Blazing fast GPU-Accelerated terminal
     git
-    networkmanagerapplet # Network panel monitoring engine
-    libnotify           # Notification transmission protocol
-    firefox
-    discord
-    yazi
-    flameshot
-    wl-clipboard
-    brightnessctl
+    vim
+    nano
     wireplumber
-    lxqt.lxqt-policykit
-    fastfetch
-    btop
-    brave
-    protonmail-desktop
-    steam
-    heroic
-    protonup-qt
-    protontricks                   # Crucial winetricks wrapper for Steam games
-    wineWow64Packages.unstableFull # Full Wine layer supporting both 32-bit and 64-bit windows binaries
-    winetricks                     # Manual DLL installation helper tool for standalone Wine prefixes
-    steam-run                      # Incredibly helpful utility to run raw binaries inside Steam's environment
-    p7zip
-    unrar
-    bat
-    doublecmd
-    fzf
+    brightnessctl
     solaar
-    wget
-    aichat
+    nixd
+    nixfmt-rfc-style
 
     # PRINTER UTILITIES & FIRMWARE LAYERS
-    hplipWithPlugin            # FIXED: Exposes hp-setup and handles network firmware hooks
+    hplipWithPlugin # FIXED: Exposes hp-setup and handles network firmware hooks
 
     # ADD THE NOCTALIA PACKAGE FROM FLAKE INPUTS NATIVELY HERE
     inputs.noctalia.packages.${pkgs.stdenv.hostPlatform.system}.default
 
     # THEME ENGINES: Restores missing assets for Dolphin dark mode
-    kdePackages.breeze-icons   # Missing icon assets used by dark modes
-    kdePackages.breeze         # Core dark rendering assets for Qt6 apps
+    kdePackages.breeze-icons # Missing icon assets used by dark modes
+    kdePackages.breeze # Core dark rendering assets for Qt6 apps
 
-    # MODERN ASYNCHRONOUS EDITING ENGINE
-    neovim                     # Replaced legacy vim with full Neovim framework
-    
     # FONTS (FIXED: Safely integrated back inside systemPackages list)
-    nerd-fonts.fira-code       # High-readability font with clear multi-character spacing
-    nerd-fonts.mononoki        # Broad visual width font family, fantastic for eyesight strain
+    nerd-fonts.fira-code # High-readability font with clear multi-character spacing
+    nerd-fonts.mononoki # Broad visual width font family, fantastic for eyesight strain
   ];
 
   system.stateVersion = "26.05"; # Did you read the comment?
 }
-
