@@ -204,22 +204,22 @@
             default_command_agent = "LocalCode",
             
             providers = {
-              openai = {
-                disable = false,
-                endpoint = "http://127.0.0",
-                secret = "dummy_secret",
-              },
-              copilot = { disable = true },
-              anthropic = { disable = true },
-              googleai = { disable = true },
-              ollama = { disable = true },
+              openai = { disable = true; };
+              
+              ollama = {
+                endpoint = "http://localhost:11434/v1/chat/completions";
+              };
+              
+              copilot = { disable = true; };
+              anthropic = { disable = true; };
+              googleai = { disable = true; };
             },
             agents = {
               {
                 name = "LocalChat",
                 chat = true,
                 command = false,
-                provider = "openai",
+                provider = "ollama",
                 model = { model = "llama3:latest" },
                 system_prompt = "You are a helpful, concise local AI assistant.",
               },
@@ -227,7 +227,7 @@
                 name = "LocalCode",
                 chat = false,
                 command = true,
-                provider = "openai",
+                provider = "ollama",
                 model = { model = "qwen2.5-coder:14b" },
                 system_prompt = "You are an expert AI programmer. Output only code changes.",
               },
@@ -250,6 +250,7 @@
     profiles.default = {
       extensions = with pkgs.vscode-extensions; [
         jnoortheen.nix-ide
+        vscodevim.vim
       ];
 
       # This replaces your manual settings.json file entirely!

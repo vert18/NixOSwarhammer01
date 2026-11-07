@@ -205,9 +205,8 @@
     enable = true;
     settings = {
       default_session = {
-        # FIXED: Directly references the official nixpkgs package and its native session runner
-        command = "${pkgs.noctalia-greeter}/bin/noctalia-greeter-session";
-        user = "greeter";
+        command = "${pkgs.dbus}/bin/dbus-run-session umbriel";
+        user = "fearless";
       };
     };
   };
@@ -230,7 +229,7 @@
     brightnessctl
     solaar
     nixd
-    nixfmt-rfc-style
+    nixfmt
 
     # PRINTER UTILITIES & FIRMWARE LAYERS
     hplipWithPlugin # FIXED: Exposes hp-setup and handles network firmware hooks
