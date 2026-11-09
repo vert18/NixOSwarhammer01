@@ -30,6 +30,11 @@
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    # Add the weekly pre-compiled index database
+    nix-index-database = {
+      url = "github:nix-community/nix-index-database";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };    
   };
 
   outputs = { self, nixpkgs, disko, helium, umbriel, noctalia, home-manager, ... }@inputs: {

@@ -13,6 +13,7 @@
   imports = [
     inputs.umbriel.homeModules.default
     inputs.noctalia.homeModules.default
+    inputs.nix-index-database.homeModules.nix-index
   ];
 
   # 1. Disable strict automatic generation to avoid syntax battles
@@ -99,7 +100,7 @@
 
     # Communication & General Applications
     firefox # Primary web browser
-    brave # Secondary privacy browser
+    #brave # Secondary privacy browser
     discord # Messaging platform
     protonmail-desktop # Dedicated desktop client application
     # vscodium # Your streamlined asynchronous IDE workspace
@@ -107,7 +108,7 @@
     # Development & Script Compilation Layers
     gjs # Gnome JavaScript platform bindings
     bun # Extremely fast JS/TS bundler engine
-    aichat # Fast command-line local chat companion app
+    #aichat # Fast command-line local chat companion app
 
     # Gaming Frameworks, Launchers & Runners
     steam # Native Linux gaming storefront architecture
@@ -119,7 +120,28 @@
     steam-run # Isolates and executes standalone unmanaged binaries natively
     p7zip # Multi-format deep archive compression engine
     unrar # Archive extraction dependency tools
+
+    # Core CLI Audio Streamers
+    mpv
+    yt-dlp
+    yewtube
+
+    # Desktop Privacy YouTube Client
+    freetube
   ];
+
+  # Enable nix-index and its command-not-found hook
+  programs.nix-index = {
+    enable = true;
+    enableBashIntegration = true; # Set to true if you use Bash
+    enableZshIntegration = true;  # Set to true if you use Zsh
+    enableFishIntegration = false; # Set to true if you use Fish
+  };
+
+  # Optional: standard nix-index can conflict with the default NixOS command-not-found script.
+  # If you see conflicts during activation, you may want to disable the system-wide one 
+  # in your system-level configuration.nix:
+  # programs.command-not-found.enable = false;
 
   # Set Vim as the universal default editor across Yazi and your shell profile
   home.sessionVariables = {
@@ -289,6 +311,13 @@
     };
   }; # lol
 
+  xdg.mimeApps = {
+    enable = true;
+    defaultApplications = {
+      "inode/directory" = [ "doublecmd.desktop" ];
+    };
+  };
+
   # QUICK BUILD ALIASES
   programs.bash = {
     enable = true;
@@ -296,7 +325,8 @@
       remake = "cd ~/nixos-config && git add -A && sudo nixos-rebuild switch --flake .#warhammer";
       ls = "eza --color=always --icons=always --group-directories-first";
       la = "eza -la --color=always --icons=always --group-directories-first";
-      lt = "eza --tree --color=always --icons=always --group-directories-first"; # Displays folder structures as clean trees!
+      lt = "eza --tree --color=always --icons=always --group-directories-first";
+      music = "mpv --no-video --ytdl-format=bestaudio";
     };
   };
 }

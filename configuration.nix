@@ -126,6 +126,8 @@
     QT_AUTO_SCREEN_SCALE_FACTOR = "1";
     QT_QPA_PLATFORMTHEME = "qt5ct";
     GTK_THEME = "Adwaita:dark";
+    __GL_THREADED_OPTIMIZATIONS = "1";
+    VK_ICD_FILENAMES = "/run/opengl-driver/share/vulkan/icd.d/nvidia_icd.json";
   };
 
   # Network (wired ethernet auto-dhcp)
