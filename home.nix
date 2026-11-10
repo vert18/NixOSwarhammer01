@@ -28,6 +28,17 @@
     "yazi/yazi.toml".source = ./dotfiles/yazi/yazi.toml;
   };
 
+  wayland.windowManager.hyprland = {
+      enable = true;
+      # Add basic fallback config lines if you want to bypass your dotfiles
+      settings = {
+          "$mod" = "SUPER";
+          bind = [
+          "$mod, Return, exec, kitty"
+      ];
+    };
+  };
+
   # Write standalone configuration maps forcing Adwaita-dark system-wide
   xdg.configFile."qt5ct/qt5ct.conf".text = ''
     [Appearance]

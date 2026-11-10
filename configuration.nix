@@ -22,6 +22,20 @@
   # Allow Unfree packages
   nixpkgs.config.allowUnfree = true;
 
+  nixpkgs.overlays = [
+    (final: prev: {
+      egl-wayland = prev.egl-wayland.overrideAttrs (old: rec {
+        version = "1.1.22";
+        src = prev.fetchFromGitHub {
+          owner = "NVIDIA";
+          repo = "egl-wayland";
+          rev = version;
+          hash = "sha256-3adLn4Sa2jzeg1uR00fVVLgVGdORlpp1xm7Il5i8xpQ=";
+        };
+      });
+     })
+   ];
+
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
@@ -90,12 +104,17 @@
     '';
     deps = [ ];
   };
+  # Noctalia Shell v5
+  # programs.noctalia.systemd.enable = true;
 
   # Enable Hyprland Natively
   programs.hyprland = {
     enable = true;
     xwayland.enable = true;
   };
+
+  # Make absolutely sure default unit stays on text mode for now
+  #systemd.defaultUnit = lib.mkForce "multi-user.target";
 
   # Enable the compositor system-wide
   programs.umbriel.enable = true;
@@ -120,6 +139,16 @@
   services.upower.enable = true;
   services.power-profiles-daemon.enable = true;
 
+  #environment.sessionVariables = {
+  #  NIXOS_OZONE_WL = "1";
+  #  __EGL_VENDOR_LIBRARY_FILENAMES = "/run/opengl-driver/share/glvnd/egl_vendor.d/50_mesa.json";
+  #  QT_AUTO_SCREEN_SCALE_FACTOR = "1";
+  #  QT_QPA_PLATFORMTHEME = "qt5ct";
+  #  GTK_THEME = "Adwaita:dark";
+  #  __GL_THREADED_OPTIMIZATIONS = "1";
+  #  VK_ICD_FILENAMES = "/run/opengl-driver/share/vulkan/icd.d/nvidia_icd.json";
+  #};
+
   # Nvidia specifics: ensure Wayland app compatibility
   environment.sessionVariables = {
     NIXOS_OZONE_WL = "1";
@@ -129,6 +158,19 @@
     __GL_THREADED_OPTIMIZATIONS = "1";
     VK_ICD_FILENAMES = "/run/opengl-driver/share/vulkan/icd.d/nvidia_icd.json";
   };
+
+  #environment.sessionVariables = {
+  #  NIXOS_OZONE_WL = "1";
+  #  GBM_BACKEND = "nvidia-drm";
+  #  __GLX_VENDOR_LIBRARY_NAME = "nvidia";
+  #  __EGL_VENDOR_LIBRARY_FILENAMES = "/run/opengl-driver/share/glvnd/egl_vendor.d/10_nvidia.json";
+  #  QT_AUTO_SCREEN_SCALE_FACTOR = "1";
+  #  QT_QPA_PLATFORMTHEME = "qt5ct";
+  #  GTK_THEME = "Adwaita:dark";
+  # __GL_THREADED_OPTIMIZATIONS = "1";
+  # VK_ICD_FILENAMES = "/run/opengl-driver/share/vulkan/icd.d/nvidia_icd.json";
+  #};
+
 
   # Network (wired ethernet auto-dhcp)
   networking.hostName = "warhammer";
@@ -203,21 +245,42 @@
   };
 
   # Enable greetd display manager with the Noctalia Greeter frontend
+  #services.greetd = {
+  #  enable = true;
+  #  settings = {
+  #    default_session = {
+  #      command = "${pkgs.noctalia-greeter}/bin/noctalia-greeter-session";
+  #      #command = "${pkgs.dbus}/bin/dbus-run-session umbriel";
+  #      user = "greeter";
+  #    };
+  #  };
+  #};
+
+  #services.displayManager.noctalia-greeter = {
+  #    enable = true;
+  #    settings = {
+  #        cursor.size = 24;
+  #    };
+  #};
+
   services.greetd = {
     enable = true;
     settings = {
       default_session = {
-        command = "${pkgs.dbus}/bin/dbus-run-session umbriel";
-        user = "fearless";
+        command = "${pkgs.tuigreet}/bin/tuigreet --time --remember --cmd umbriel";
+        user = "greeter";
       };
     };
   };
 
   # Replicates your exact TTY workflow automatically after you log in
-  environment.etc."greetd/environments".text = ''
-    dbus-run-session umbriel
-    hyprland
-  '';
+  #environment.etc."greetd/environments".text = ''
+  #  dbus-run-session umbriel
+  #  hyprland
+  #'';
+
+  # Make sure greetd runs
+  # services.greetd.enable = true;
 
   # Ensure 32-bit graphics support is explicitly active for older Wine/Steam titles
   hardware.graphics.enable32Bit = true;
@@ -232,6 +295,7 @@
     solaar
     nixd
     nixfmt
+    foot
 
     # PRINTER UTILITIES & FIRMWARE LAYERS
     hplipWithPlugin # FIXED: Exposes hp-setup and handles network firmware hooks

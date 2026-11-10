@@ -2,10 +2,10 @@
   description = "fearless main flake";
 
   nixConfig = {
-    extra-substituters = [ "https://cachix.org" ]; # FIXED: Pointed to target cache
+    extra-substituters = [ "https://cachix.org" ];
     extra-trusted-public-keys = [ "umbriel.cachix.org-1:JfNq/2yg2S6D6z4Z2dVSZrZlDPQTKtexB6GAVLD98nw=" ];
   };
-  
+    
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
 
@@ -21,11 +21,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    umbriel.url = "github:noctalia-dev/umbriel";
-    noctalia = {
-      url = "github:noctalia-dev/noctalia";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+   umbriel = {
+     url = "github:noctalia-dev/umbriel";
+     inputs.nixpkgs.follows = "nixpkgs";
+   };
+
     home-manager = {
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
