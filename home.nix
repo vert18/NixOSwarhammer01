@@ -106,6 +106,8 @@
     doublecmd # Double Commander file manager (with Kitty/VSCodium integrations)
     yazi # Fast asynchronous terminal file browser
     flameshot # Desktop snapshot/screengrab selection interface
+    grim
+    slurp
     networkmanagerapplet # Graphical network management utility tray panel
     lxqt.lxqt-policykit # Handles administrative visual authentication loops
 
