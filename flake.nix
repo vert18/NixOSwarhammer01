@@ -7,7 +7,7 @@
   };
     
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-26.05";
 
     # ADD THE DISKO INPUT COMPONENT HERE
     disko = {
@@ -21,13 +21,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-   umbriel = {
-     url = "github:noctalia-dev/umbriel";
-     inputs.nixpkgs.follows = "nixpkgs";
-   };
+    umbriel.url = "github:noctalia-dev/umbriel";
+    noctalia.url = "github:noctalia-dev/noctalia";
 
     home-manager = {
-      url = "github:nix-community/home-manager";
+      url = "github:nix-community/home-manager/release-26.05";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     # Add the weekly pre-compiled index database
@@ -35,7 +33,7 @@
       url = "github:nix-community/nix-index-database";
       inputs.nixpkgs.follows = "nixpkgs";
     };    
-  };
+  };  
 
   outputs = { self, nixpkgs, disko, helium, umbriel, noctalia, home-manager, ... }@inputs: {
     nixosConfigurations.warhammer = nixpkgs.lib.nixosSystem {

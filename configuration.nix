@@ -22,19 +22,19 @@
   # Allow Unfree packages
   nixpkgs.config.allowUnfree = true;
 
-  nixpkgs.overlays = [
-    (final: prev: {
-      egl-wayland = prev.egl-wayland.overrideAttrs (old: rec {
-        version = "1.1.22";
-        src = prev.fetchFromGitHub {
-          owner = "NVIDIA";
-          repo = "egl-wayland";
-          rev = version;
-          hash = "sha256-3adLn4Sa2jzeg1uR00fVVLgVGdORlpp1xm7Il5i8xpQ=";
-        };
-      });
-     })
-   ];
+  #nixpkgs.overlays = [
+  #  (final: prev: {
+  #    egl-wayland = prev.egl-wayland.overrideAttrs (old: rec {
+  #      version = "1.1.22";
+  #      src = prev.fetchFromGitHub {
+  #        owner = "NVIDIA";
+  #        repo = "egl-wayland";
+  #        rev = version;
+  #        hash = "sha256-3adLn4Sa2jzeg1uR00fVVLgVGdORlpp1xm7Il5i8xpQ=";
+  #      };
+  #    });
+  #   })
+  # ];
 
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
@@ -55,7 +55,7 @@
   };
 
   # Use latest kernel.
-  boot.kernelPackages = pkgs.linuxPackages_latest;
+  boot.kernelPackages = pkgs.linuxPackages;
 
   # CRUCIAL NVIDIA DRM BOOT FLAGS... fixed waitpid / child process crashes
   boot.kernelParams = [
