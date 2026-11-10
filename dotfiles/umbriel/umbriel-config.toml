@@ -18,6 +18,8 @@ layout.mode = "dwindle"
 [output.DP-1]
 mode = "3840x2160@144"
 scale = 1.75
+hdr = "auto"
+vrr = "fullscreen"
 
 [keybinds]
 "Mod+Return" = "spawn kitty"
