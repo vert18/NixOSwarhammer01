@@ -159,12 +159,15 @@
 
   # Nvidia specifics: ensure Wayland app compatibility
   environment.sessionVariables = {
+    __GL_SHADER_DISK_CACHE = "1";
+    __GL_SHADER_DISK_CACHE_SIZE = "10737418240";  
     NIXOS_OZONE_WL = "1";
     QT_AUTO_SCREEN_SCALE_FACTOR = "1";
     QT_QPA_PLATFORMTHEME = "qt5ct";
     GTK_THEME = "Adwaita:dark";
     __GL_THREADED_OPTIMIZATIONS = "1";
     VK_ICD_FILENAMES = "/run/opengl-driver/share/vulkan/icd.d/nvidia_icd.json";
+
   };
 
   #environment.sessionVariables = {
@@ -241,6 +244,7 @@
             pkgs.python3
             pkgs.icu
             pkgs.libxcrypt-legacy
+            pkgs.zstd
           ];
         };
       in
