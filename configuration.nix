@@ -41,6 +41,14 @@
   boot.loader.efi.canTouchEfiVariables = true;
   boot.loader.systemd-boot.configurationLimit = 5;
 
+  nix.settings.auto-optimise-store = true;
+
+  nix.gc = {
+    automatic = true;
+    dates = "weekly";
+    options = "--delete-older-than 14d";
+  };
+
   # VIRTUAL IN-MEMORY SWAP: Fast, compressed block device in your RAM pool
   zramSwap = {
     enable = true;
