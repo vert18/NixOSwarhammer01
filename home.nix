@@ -111,7 +111,7 @@
 
     # Communication & General Applications
     firefox # Primary web browser
-    #brave # Secondary privacy browser
+    brave # Secondary privacy browser
     discord # Messaging platform
     protonmail-desktop # Dedicated desktop client application
     # vscodium # Your streamlined asynchronous IDE workspace
@@ -119,7 +119,7 @@
     # Development & Script Compilation Layers
     gjs # Gnome JavaScript platform bindings
     bun # Extremely fast JS/TS bundler engine
-    #aichat # Fast command-line local chat companion app
+    aichat # Fast command-line local chat companion app
 
     # Gaming Frameworks, Launchers & Runners
     steam # Native Linux gaming storefront architecture
