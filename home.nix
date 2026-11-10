@@ -111,7 +111,7 @@
 
     # Communication & General Applications
     firefox # Primary web browser
-    brave # Secondary privacy browser
+    #brave # Secondary privacy browser
     discord # Messaging platform
     protonmail-desktop # Dedicated desktop client application
     # vscodium # Your streamlined asynchronous IDE workspace
@@ -140,6 +140,14 @@
     # Desktop Privacy YouTube Client
     freetube
   ];
+
+  programs.chromium = {
+    enable = true;
+    package = pkgs.brave;
+    commandLineArgs = [
+      "--ozone-platform-hint=auto"
+    ];
+  };
 
   # Enable nix-index and its command-not-found hook
   programs.nix-index = {
