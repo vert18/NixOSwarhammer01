@@ -1,11 +1,21 @@
 [general]
 mod_key = "Super"
-autostart = [ "noctalia" ]
+autostart = [
 #nvidia_sync_workaround = false
 #xwayland = false
+  "dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=sway",
+  "systemctl --user restart xdg-desktop-portal xdg-desktop-portal-wlr",
+  "noctalia"
+  ]
 
 [environment]
 __EGL_VENDOR_LIBRARY_FILENAMES = "/run/opengl-driver/share/glvnd/egl_vendor.d/50_mesa.json"
+
+[[window_rule]]
+match.app_id = "^(org\\.flameshot\\.)?[Ff]lameshot$"
+default_floating = true
+default_fullscreen = true
+border_width = 0
 
 [layout]
 gap = 24                  
@@ -29,8 +39,8 @@ vrr = "fullscreen"
 "Mod+B" = "spawn brave"
 "Mod+E"       = "spawn doublecmd"
 "Mod+Shift+E" = "spawn kitty yazi"
-"Print"       = "spawn sh -c 'pkill -9 flameshot; QT_QPA_PLATFORM=wayland flameshot gui'"
-"Mod+P"       = "spawn sh -c 'pkill -9 flameshot; QT_QPA_PLATFORM=wayland flameshot gui'"
+"Print" = "spawn sh -c 'pkill -9 flameshot; QT_QPA_PLATFORM=wayland flameshot gui'"
+"Mod+P" = "spawn sh -c 'pkill -9 flameshot; QT_QPA_PLATFORM=wayland flameshot gui'"
 
 # HARDWARE CONTROLS: Native Volume and Brightness key bindings
 "XF86AudioRaiseVolume" = "spawn wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+"

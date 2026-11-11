@@ -20,6 +20,19 @@
   programs.umbriel.enable = false;
   programs.noctalia.enable = false;
 
+xdg.portal = {
+  enable = true;
+  extraPortals = [
+    pkgs.xdg-desktop-portal-gtk
+    pkgs.xdg-desktop-portal-wlr
+  ];
+  config.common = {
+    default = [ "gtk" ];
+    "org.freedesktop.impl.portal.Screenshot" = [ "wlr" ];
+    "org.freedesktop.impl.portal.ScreenCast" = [ "wlr" ];
+  };
+};
+
   # 2. Tell Home Manager to link to normal, writeable files in your config directory
   xdg.configFile = {
     "umbriel/config.toml".source = ./dotfiles/umbriel/umbriel-config.toml;
