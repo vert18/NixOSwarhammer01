@@ -67,15 +67,6 @@ EOF
     echo "Done! Prefix $APPID is ready for Synthesis."
   '';
 
-  # 3. Universal XWayland launcher for SSEEdit/xEdit across any modlist
-  sseedit-x11 = pkgs.writeShellScriptBin "sseedit-x11" ''
-    export WINEPREFIX="''${WINEPREFIX:-$HOME/.local/share/Steam/steamapps/compatdata/3982416457/pfx}"
-    unset WAYLAND_DISPLAY
-    export PROTON_ENABLE_WAYLAND=0
-    exec ${pkgs.steam-run}/bin/steam-run \
-      "$HOME/.local/share/Steam/compatibilitytools.d/GE-Proton11-12-x86_64/files/bin/wine" \
-      "$@"
-  '';
 in
 
 {
@@ -181,7 +172,7 @@ xdg.portal = {
   home.packages = with pkgs; [
     jackify-wrapped
     fix-synthesis-prefix
-    sseedit-x11
+  #  sseedit-x11
   # Terminal & Command-Line Shell Utilities
     kitty # Your core fast GPU-accelerated terminal
     fzf # Interactive fuzzy finder utility
@@ -249,8 +240,6 @@ xdg.portal = {
       fi
     done
   '';
-
-  home.file.".local/share/sseedit-x11".source = "${sseedit-x11}/bin/sseedit-x11";
   
   programs.chromium = {
     enable = true;
