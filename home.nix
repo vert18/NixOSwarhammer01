@@ -246,6 +246,7 @@ xdg.portal = {
     package = pkgs.brave;
     commandLineArgs = [
       "--ozone-platform-hint=auto"
+      "--no-default-browser-check"
     ];
   };
 
@@ -265,6 +266,7 @@ xdg.portal = {
   # Set Vim as the universal default editor across Yazi and your shell profile
   home.sessionVariables = {
     EDITOR = "nvim";
+    BROWSER = "helium";
   };
 
   # Automatically creates a convenient ~/Storage symlink pointing to your LVM drive
@@ -434,6 +436,11 @@ xdg.portal = {
     enable = true;
     defaultApplications = {
       "inode/directory" = [ "doublecmd.desktop" ];
+      "text/html" = [ "helium.desktop" ];
+      "x-scheme-handler/http" = [ "helium.desktop" ];
+      "x-scheme-handler/https" = [ "helium.desktop" ];
+      "x-scheme-handler/about" = [ "helium.desktop" ];
+      "x-scheme-handler/unknown" = [ "helium.desktop" ];
     };
   };
 
