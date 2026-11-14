@@ -325,5 +325,22 @@
     nerd-fonts.mononoki # Broad visual width font family, fantastic for eyesight strain
   ];
 
+  # Top-level module option (outside environment.systemPackages)
+  programs.nix-ld = {
+    enable = true;
+    libraries = with pkgs; [
+      stdenv.cc.cc
+      zlib
+      fuse3
+      icu
+      nss
+      openssl
+      curl
+      expat
+      pkgsi686Linux.glibc
+    ];
+  };
+
+
   system.stateVersion = "26.05"; # Did you read the comment?
 }
