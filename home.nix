@@ -227,13 +227,20 @@ with pkgs;
   home.activation.wine4kDpi = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     for PFX in "$HOME/.local/share/Steam/steamapps/compatdata/"*/pfx \
                "/mnt/mylm/SteamLibrary/steamapps/compatdata/"*/pfx; do
-      if [ -f "$PFX/user.reg" ] && ! grep -q '"LogPixels"=dword:00000090' "$PFX/user.reg"; then
-        $DRY_RUN_CMD sed -i '/"LogPixels"=dword:/d' "$PFX/user.reg"
-        $DRY_RUN_CMD sh -c 'printf "\n[Control Panel\\\\Desktop]\n\"LogPixels\"=dword:00000090\n" >> "$1"' _ "$PFX/user.reg"
+      if [ -f "$PFX/user.reg" ]; then
+        # Clean up any malformed Control PanelDesktop section from earlier
+        $DRY_RUN_CMD sed -i '/^\[Control PanelDesktop\]/,+2d' "$PFX/user.reg"
+
+        # If [Software\\Wine\\Fonts] already exists, update its LogPixels value to 0x90 (144 DPI)
+        if grep -q '^\[Software\\\\Wine\\\\Fonts\]' "$PFX/user.reg"; then
+          $DRY_RUN_CMD sed -i '/^\[Software\\\\Wine\\\\Fonts\]/,/^\[/ s/"LogPixels"=dword:[0-9a-fA-F]*/"LogPixels"=dword:00000090/' "$PFX/user.reg"
+        else
+          $DRY_RUN_CMD sh -c 'printf "\n[Software\\\\Wine\\\\Fonts]\n\"LogPixels\"=dword:00000090\n" >> "$1"' _ "$PFX/user.reg"
+        fi
       fi
     done
   '';
-
+  
   programs.chromium = {
     enable = true;
     package = pkgs.brave;
