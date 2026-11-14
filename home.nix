@@ -2,6 +2,7 @@
   inputs,
   pkgs,
   config,
+  lib,
   ...
 }:
 {
@@ -222,6 +223,16 @@ with pkgs;
     # Desktop Privacy YouTube Client
     freetube
   ];
+
+  home.activation.wine4kDpi = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    for PFX in "$HOME/.local/share/Steam/steamapps/compatdata/"*/pfx \
+               "/mnt/mylm/SteamLibrary/steamapps/compatdata/"*/pfx; do
+      if [ -f "$PFX/user.reg" ] && ! grep -q '"LogPixels"=dword:00000090' "$PFX/user.reg"; then
+        $DRY_RUN_CMD sed -i '/"LogPixels"=dword:/d' "$PFX/user.reg"
+        $DRY_RUN_CMD sh -c 'printf "\n[Control Panel\\\\Desktop]\n\"LogPixels\"=dword:00000090\n" >> "$1"' _ "$PFX/user.reg"
+      fi
+    done
+  '';
 
   programs.chromium = {
     enable = true;
