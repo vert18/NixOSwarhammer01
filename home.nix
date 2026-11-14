@@ -5,6 +5,79 @@
   lib,
   ...
 }:
+
+let
+  # 1. Global Jackify wrapper: runs the extracted AppImage inside steam-run
+  jackify-wrapped = pkgs.writeShellScriptBin "jackify" ''
+    exec ${pkgs.steam-run}/bin/steam-run /mnt/mylm/utils/jackify/jackify-extracted/AppRun "$@"
+  '';
+
+  # 2. Reusable prefix patcher
+  fix-synthesis-prefix = pkgs.writeShellScriptBin "fix-synthesis-prefix" ''
+    # ... keep your existing fix-synthesis-prefix body here ...
+    APPID="''${1:-3982416457}"
+    PFX="$HOME/.local/share/Steam/steamapps/compatdata/$APPID/pfx"
+
+      if [ ! -d "$PFX" ]; then
+        echo "Error: Prefix not found at $PFX"
+        echo "Usage: fix-synthesis-prefix <Steam_AppID>"
+        exit 1
+      fi
+
+        echo "Applying Synthesis NuGet & WPF fixes to prefix $APPID..."
+
+        # Write trustedSigners NuGet.Config into the prefix
+        mkdir -p "$PFX/drive_c/users/steamuser/AppData/Roaming/NuGet"
+        mkdir -p "$PFX/drive_c/ProgramData/NuGet/Config"
+        cat << 'EOF' > "$PFX/drive_c/users/steamuser/AppData/Roaming/NuGet/NuGet.Config"
+<?xml version="1.0" encoding="utf-8"?>
+<configuration>
+  <packageSources>
+    <add key="nuget.org" value="https://api.nuget.org/v3/index.json" protocolVersion="3" />
+  </packageSources>
+  <config>
+    <add key="signatureValidationMode" value="accept" />
+  </config>
+  <trustedSigners>
+    <author name="Microsoft">
+      <certificate fingerprint="AA12DA22A49BCE7D5C1AE64CC1F3D892F150DA76140F210ABD2CBFFCA2C18A27" hashAlgorithm="SHA256" allowUntrustedRoot="true" />
+      <certificate fingerprint="566A31882BE208BE4422F7CFD66ED09F5D4524A5994F50CCC8B05EC0528C1353" hashAlgorithm="SHA256" allowUntrustedRoot="true" />
+    </author>
+    <repository name="nuget.org" serviceIndex="https://api.nuget.org/v3/index.json">
+      <certificate fingerprint="5A2901D6ADA3D18260B9C6DFE2133C95D74B9EEF6AE0E5DC334C8454D1477DF4" hashAlgorithm="SHA256" allowUntrustedRoot="true" />
+      <certificate fingerprint="0E5F38F57DC1BCC806D8494F4F90FBCEDD988B46760709CBEEC6F4219AA6157D" hashAlgorithm="SHA256" allowUntrustedRoot="true" />
+      <owners>Microsoft;aspnet;dotnetframework</owners>
+    </repository>
+  </trustedSigners>
+</configuration>
+EOF
+
+    cp "$PFX/drive_c/users/steamuser/AppData/Roaming/NuGet/NuGet.Config" \
+       "$PFX/drive_c/ProgramData/NuGet/Config/NuGet.Config"
+
+    # Disable WPF hardware acceleration if not already present
+    if ! grep -q "DisableHWAcceleration" "$PFX/user.reg"; then
+      cat << 'EOF' >> "$PFX/user.reg"
+
+[Software\\Microsoft\\Avalon.Graphics]
+"DisableHWAcceleration"=dword:00000001
+EOF
+    fi
+
+    echo "Done! Prefix $APPID is ready for Synthesis."
+  '';
+
+  # 3. Universal XWayland launcher for SSEEdit/xEdit across any modlist
+  sseedit-x11 = pkgs.writeShellScriptBin "sseedit-x11" ''
+    export WINEPREFIX="''${WINEPREFIX:-$HOME/.local/share/Steam/steamapps/compatdata/3982416457/pfx}"
+    unset WAYLAND_DISPLAY
+    export PROTON_ENABLE_WAYLAND=0
+    exec ${pkgs.steam-run}/bin/steam-run \
+      "$HOME/.local/share/Steam/compatibilitytools.d/GE-Proton11-12-x86_64/files/bin/wine" \
+      "$@"
+  '';
+in
+
 {
 
   home.username = "fearless";
@@ -105,74 +178,10 @@ xdg.portal = {
   };
 
  # User Workspace Applications Layer
-  home.packages =
-    let
-      # 1. Global Jackify wrapper: runs the extracted AppImage inside steam-run
-      # Works for every modlist you manage with Jackify
-      jackify-wrapped = pkgs.writeShellScriptBin "jackify" ''
-      exec ${pkgs.steam-run}/bin/steam-run /mnt/mylm/utils/jackify/jackify-extracted/AppRun "$@"
-      '';
-
-      # 2. Reusable prefix patcher: pass any Steam AppID (or defaults to 3982416457)
-      # Fixes NuGet signature trust + WPF rendering for any new modlist prefix
-      fix-synthesis-prefix = pkgs.writeShellScriptBin "fix-synthesis-prefix" ''
-        APPID="''${1:-3982416457}"
-        PFX="$HOME/.local/share/Steam/steamapps/compatdata/$APPID/pfx"
-
-        if [ ! -d "$PFX" ]; then
-          echo "Error: Prefix not found at $PFX"
-          echo "Usage: fix-synthesis-prefix <Steam_AppID>"
-          exit 1
-        fi
-
-        echo "Applying Synthesis NuGet & WPF fixes to prefix $APPID..."
-
-        # Write trustedSigners NuGet.Config into the prefix
-        mkdir -p "$PFX/drive_c/users/steamuser/AppData/Roaming/NuGet"
-        mkdir -p "$PFX/drive_c/ProgramData/NuGet/Config"
-
-        cat << 'EOF' > "$PFX/drive_c/users/steamuser/AppData/Roaming/NuGet/NuGet.Config"
-<?xml version="1.0" encoding="utf-8"?>
-<configuration>
-  <packageSources>
-    <add key="nuget.org" value="https://api.nuget.org/v3/index.json" protocolVersion="3" />
-  </packageSources>
-  <config>
-    <add key="signatureValidationMode" value="accept" />
-  </config>
-  <trustedSigners>
-    <author name="Microsoft">
-      <certificate fingerprint="AA12DA22A49BCE7D5C1AE64CC1F3D892F150DA76140F210ABD2CBFFCA2C18A27" hashAlgorithm="SHA256" allowUntrustedRoot="true" />
-      <certificate fingerprint="566A31882BE208BE4422F7CFD66ED09F5D4524A5994F50CCC8B05EC0528C1353" hashAlgorithm="SHA256" allowUntrustedRoot="true" />
-    </author>
-    <repository name="nuget.org" serviceIndex="https://api.nuget.org/v3/index.json">
-      <certificate fingerprint="5A2901D6ADA3D18260B9C6DFE2133C95D74B9EEF6AE0E5DC334C8454D1477DF4" hashAlgorithm="SHA256" allowUntrustedRoot="true" />
-      <certificate fingerprint="0E5F38F57DC1BCC806D8494F4F90FBCEDD988B46760709CBEEC6F4219AA6157D" hashAlgorithm="SHA256" allowUntrustedRoot="true" />
-      <owners>Microsoft;aspnet;dotnetframework</owners>
-    </repository>
-  </trustedSigners>
-</configuration>
-EOF
-
-    cp "$PFX/drive_c/users/steamuser/AppData/Roaming/NuGet/NuGet.Config" \
-       "$PFX/drive_c/ProgramData/NuGet/Config/NuGet.Config"
-
-    # Disable WPF hardware acceleration if not already present
-    if ! grep -q "DisableHWAcceleration" "$PFX/user.reg"; then
-      cat << 'EOF' >> "$PFX/user.reg"
-
-[Software\\Microsoft\\Avalon.Graphics]
-"DisableHWAcceleration"=dword:00000001
-EOF
-    fi
-
-    echo "Done! Prefix $APPID is ready for Synthesis."
-  '';
-in
-with pkgs;
- [
+  home.packages = with pkgs; [
     jackify-wrapped
     fix-synthesis-prefix
+    sseedit-x11
   # Terminal & Command-Line Shell Utilities
     kitty # Your core fast GPU-accelerated terminal
     fzf # Interactive fuzzy finder utility
@@ -231,15 +240,17 @@ with pkgs;
         # Clean up any malformed Control PanelDesktop section from earlier
         $DRY_RUN_CMD sed -i '/^\[Control PanelDesktop\]/,+2d' "$PFX/user.reg"
 
-        # If [Software\\Wine\\Fonts] already exists, update its LogPixels value to 0x90 (144 DPI)
+        # If [Software\\Wine\\Fonts] already exists, update its LogPixels value to 0x60 (144 DPI)
         if grep -q '^\[Software\\\\Wine\\\\Fonts\]' "$PFX/user.reg"; then
-          $DRY_RUN_CMD sed -i '/^\[Software\\\\Wine\\\\Fonts\]/,/^\[/ s/"LogPixels"=dword:[0-9a-fA-F]*/"LogPixels"=dword:00000090/' "$PFX/user.reg"
+          $DRY_RUN_CMD sed -i '/^\[Software\\\\Wine\\\\Fonts\]/,/^\[/ s/"LogPixels"=dword:[0-9a-fA-F]*/"LogPixels"=dword:00000060/' "$PFX/user.reg"
         else
-          $DRY_RUN_CMD sh -c 'printf "\n[Software\\\\Wine\\\\Fonts]\n\"LogPixels\"=dword:00000090\n" >> "$1"' _ "$PFX/user.reg"
+          $DRY_RUN_CMD sh -c 'printf "\n[Software\\\\Wine\\\\Fonts]\n\"LogPixels\"=dword:00000060\n" >> "$1"' _ "$PFX/user.reg"
         fi
       fi
     done
   '';
+
+  home.file.".local/share/sseedit-x11".source = "${sseedit-x11}/bin/sseedit-x11";
   
   programs.chromium = {
     enable = true;

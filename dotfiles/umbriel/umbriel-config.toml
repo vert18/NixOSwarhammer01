@@ -17,6 +17,11 @@ default_floating = true
 default_fullscreen = true
 border_width = 0
 
+[[window_rule]]
+match.app_id = "^sseedit\\.exe$"
+default_floating = true
+default_floating_size_px = { width = 800, height = 600 }
+
 [layout]
 gap = 24                  
 
