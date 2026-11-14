@@ -419,6 +419,16 @@ with pkgs;
     };
   };
 
+  xdg.desktopEntries."com.jackify.app" = {
+    name = "Jackify";
+    comment = "Wabbajack modlist manager for Linux";
+    exec = "jackify %U";
+    icon = "com.jackify.app";
+    terminal = false;
+    type = "Application";
+    categories = [ "Game" "Utility" ];
+  };
+
   # QUICK BUILD ALIASES
   programs.bash = {
     enable = true;
