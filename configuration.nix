@@ -232,12 +232,13 @@
       Type = "oneshot";
     };
     script = ''
+      sleep 2
       for c in /proc/asound/card[0-9]*; do
         ${pkgs.alsa-utils}/bin/amixer -c "''${c##*card}" set PCM,1 100% unmute 2>/dev/null || true
       done
     '';
   };
-      
+        
   # Define your personal user account
   users.users.fearless = {
     isNormalUser = true;
