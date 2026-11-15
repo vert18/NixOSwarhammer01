@@ -215,30 +215,24 @@
         actions = {
           update-props = {
             "node.description" = "Antlion Wireless ModMic";
-            "priority.driver" = 2500;
-            "priority.session" = 2500;
+            "priority.driver" = 3000;
+            "priority.session" = 3000;
           };
         };
       }
     ];
   };
 
-  systemd.user.services.unmute-asus-front-panel = {
-    description = "Unmute ASUS ALC4082 Front Panel ESS DAC";
-    after = [ "wireplumber.service" ];
-    partOf = [ "wireplumber.service" ];
-    wantedBy = [ "default.target" "wireplumber.service" ];
-    serviceConfig = {
-      Type = "oneshot";
-    };
-    script = ''
-      sleep 2
-      for c in /proc/asound/card[0-9]*; do
-        ${pkgs.alsa-utils}/bin/amixer -c "''${c##*card}" set PCM,1 100% unmute 2>/dev/null || true
-      done
-    '';
-  };
-        
+systemd.user.services.wireplumber.serviceConfig.ExecStartPost = [
+  (pkgs.writeShellScript "unmute-asus-front-panel" ''
+    sleep 1
+    for c in /proc/asound/card[0-9]*; do
+      ${pkgs.alsa-utils}/bin/amixer -c "''${c##*card}" set PCM,0 100% unmute 2>/dev/null || true
+      ${pkgs.alsa-utils}/bin/amixer -c "''${c##*card}" set PCM,1 100% unmute 2>/dev/null || true
+    done
+  '')
+];
+            
   # Define your personal user account
   users.users.fearless = {
     isNormalUser = true;
