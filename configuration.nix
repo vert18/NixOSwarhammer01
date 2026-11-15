@@ -80,7 +80,6 @@
     open = true;
   };
 
-  # Grant unprivileged hardware access to the real Antec Flux Pro LCD hardware signatures
   services.udev.extraRules = ''
     SUBSYSTEM=="usb", ATTRS{idVendor}=="2022", ATTRS{idProduct}=="0522", MODE="0666", TAG+="uaccess"
     SUBSYSTEM=="hidraw", ATTRS{idVendor}=="2022", ATTRS{idProduct}=="0522", MODE="0666", TAG+="uaccess"
@@ -88,7 +87,7 @@
     KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="28e9", ATTRS{idProduct}=="31e2", MODE="0666", TAG+="uaccess"
     KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="3233", MODE="0666", TAG+="uaccess"
   '';
-
+  
   # Automatically enforce user ownership over the LVM storage mount on boot
   system.activationScripts.mylm-permissions = {
     text = ''
@@ -224,17 +223,21 @@
     ];
   };
 
-  systemd.services.unmute-asus-front-panel = {
+  systemd.user.services.unmute-asus-front-panel = {
     description = "Unmute ASUS ALC4082 Front Panel ESS DAC";
-    after = [ "sound.target" ];
-    wantedBy = [ "multi-user.target" ];
+    after = [ "wireplumber.service" ];
+    partOf = [ "wireplumber.service" ];
+    wantedBy = [ "default.target" "wireplumber.service" ];
     serviceConfig = {
       Type = "oneshot";
-      ExecStart = "${pkgs.alsa-utils}/bin/amixer -c Audio_1 cset numid=24 on";
     };
+    script = ''
+      for c in /proc/asound/card[0-9]*; do
+        ${pkgs.alsa-utils}/bin/amixer -c "''${c##*card}" set PCM,1 100% unmute 2>/dev/null || true
+      done
+    '';
   };
-  
-  
+      
   # Define your personal user account
   users.users.fearless = {
     isNormalUser = true;
