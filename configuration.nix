@@ -22,20 +22,6 @@
   # Allow Unfree packages
   nixpkgs.config.allowUnfree = true;
 
-  #nixpkgs.overlays = [
-  #  (final: prev: {
-  #    egl-wayland = prev.egl-wayland.overrideAttrs (old: rec {
-  #      version = "1.1.22";
-  #      src = prev.fetchFromGitHub {
-  #        owner = "NVIDIA";
-  #        repo = "egl-wayland";
-  #        rev = version;
-  #        hash = "sha256-3adLn4Sa2jzeg1uR00fVVLgVGdORlpp1xm7Il5i8xpQ=";
-  #      };
-  #    });
-  #   })
-  # ];
-
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
@@ -147,16 +133,6 @@
   services.upower.enable = true;
   services.power-profiles-daemon.enable = true;
 
-  #environment.sessionVariables = {
-  #  NIXOS_OZONE_WL = "1";
-  #  __EGL_VENDOR_LIBRARY_FILENAMES = "/run/opengl-driver/share/glvnd/egl_vendor.d/50_mesa.json";
-  #  QT_AUTO_SCREEN_SCALE_FACTOR = "1";
-  #  QT_QPA_PLATFORMTHEME = "qt5ct";
-  #  GTK_THEME = "Adwaita:dark";
-  #  __GL_THREADED_OPTIMIZATIONS = "1";
-  #  VK_ICD_FILENAMES = "/run/opengl-driver/share/vulkan/icd.d/nvidia_icd.json";
-  #};
-
   # Nvidia specifics: ensure Wayland app compatibility
   environment.sessionVariables = {
     __GL_SHADER_DISK_CACHE = "1";
@@ -167,21 +143,8 @@
     GTK_THEME = "Adwaita:dark";
     __GL_THREADED_OPTIMIZATIONS = "1";
     VK_ICD_FILENAMES = "/run/opengl-driver/share/vulkan/icd.d/nvidia_icd.json";
-
+    #ALSA_CONFIG_UCM2 = "/etc/alsa/ucm2";
   };
-
-  #environment.sessionVariables = {
-  #  NIXOS_OZONE_WL = "1";
-  #  GBM_BACKEND = "nvidia-drm";
-  #  __GLX_VENDOR_LIBRARY_NAME = "nvidia";
-  #  __EGL_VENDOR_LIBRARY_FILENAMES = "/run/opengl-driver/share/glvnd/egl_vendor.d/10_nvidia.json";
-  #  QT_AUTO_SCREEN_SCALE_FACTOR = "1";
-  #  QT_QPA_PLATFORMTHEME = "qt5ct";
-  #  GTK_THEME = "Adwaita:dark";
-  # __GL_THREADED_OPTIMIZATIONS = "1";
-  # VK_ICD_FILENAMES = "/run/opengl-driver/share/vulkan/icd.d/nvidia_icd.json";
-  #};
-
 
   # Network (wired ethernet auto-dhcp)
   networking.hostName = "warhammer";
@@ -213,6 +176,65 @@
     wireplumber.enable = true;
   };
 
+  services.pipewire.wireplumber.extraConfig."99-asus-front-panel" = {
+    "monitor.alsa.rules" = [
+      {
+        matches = [
+          {
+            "device.vendor.id" = "0x0b05";
+            "device.product.id" = "0x1b7c";
+          }
+        ];
+        actions = {
+          update-props = {
+            "device.profile" = "pro-audio";
+          };
+        };
+      }
+      {
+        matches = [
+          {
+            "node.name" = "alsa_output.usb-Generic_USB_Audio-00.pro-output-1";
+          }
+        ];
+        actions = {
+          update-props = {
+            "node.description" = "Front Headphones (ESS ES9219 DAC)";
+            "session.suspend-timeout-seconds" = 0;
+            "priority.driver" = 2000;
+            "priority.session" = 2000;
+          };
+        };
+      }
+      # ADD THIS BLOCK FOR YOUR ANTLION MODMIC:
+      {
+        matches = [
+          {
+            "node.name" = "~alsa_input.usb-Antlion.*";
+          }
+        ];
+        actions = {
+          update-props = {
+            "node.description" = "Antlion Wireless ModMic";
+            "priority.driver" = 2500;
+            "priority.session" = 2500;
+          };
+        };
+      }
+    ];
+  };
+
+  systemd.services.unmute-asus-front-panel = {
+    description = "Unmute ASUS ALC4082 Front Panel ESS DAC";
+    after = [ "sound.target" ];
+    wantedBy = [ "multi-user.target" ];
+    serviceConfig = {
+      Type = "oneshot";
+      ExecStart = "${pkgs.alsa-utils}/bin/amixer -c Audio_1 cset numid=24 on";
+    };
+  };
+  
+  
   # Define your personal user account
   users.users.fearless = {
     isNormalUser = true;
@@ -309,6 +331,8 @@
     nixfmt
     foot
     usbutils
+    alsa-utils
+    pavucontrol
 
     # PRINTER UTILITIES & FIRMWARE LAYERS
     hplipWithPlugin # FIXED: Exposes hp-setup and handles network firmware hooks

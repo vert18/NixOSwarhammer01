@@ -46,14 +46,14 @@
         # 3. ADD THE HELIUM MODULE AND CONFIGURATION
         helium.nixosModules.default
         {
-          nixpkgs.overlays = [ helium.overlays.default ];
+        nixpkgs.overlays = [ helium.overlays.default ];
           programs.helium = {
             enable = true;
             # Optional flags (e.g., for Wayland support)
             flags = [ "--ozone-platform-hint=auto" ];
           };
         }
-
+        
         ./configuration.nix
         home-manager.nixosModules.home-manager {
           home-manager.useGlobalPkgs = true;
