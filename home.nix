@@ -104,17 +104,19 @@ xdg.portal = {
     "umbriel/display-config.toml".source = ./dotfiles/umbriel/af-pro-display-config.toml;
     "noctalia/config.toml".source = ./dotfiles/noctalia/noctalia-config.toml;
     "yazi/yazi.toml".source = ./dotfiles/yazi/yazi.toml;
+    "hypr/hyprland.lua".source = config.lib.file.mkOutOfStoreSymlink "/home/fearless/nixos-config/dotfiles/hypr/hyprland.lua";
   };
 
   wayland.windowManager.hyprland = {
       enable = true;
+      xwayland.enable = true;
+      systemd.enable = false;
       # Add basic fallback config lines if you want to bypass your dotfiles
-      settings = {
-          "$mod" = "SUPER";
-          bind = [
-          "$mod, Return, exec, kitty"
-      ];
-    };
+      # settings = {
+      #     "$mod" = "SUPER";
+      #     bind = [
+      #     "$mod, Return, exec, kitty"
+      # ];
   };
 
   # Write standalone configuration maps forcing Adwaita-dark system-wide
