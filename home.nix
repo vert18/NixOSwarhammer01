@@ -216,13 +216,31 @@ xdg.portal = {
     unrar # Archive extraction dependency tools
 
     # Core CLI Audio Streamers
-    mpv
-    yt-dlp
+    #mpv
+    #yt-dlp
+    deno
     yewtube
 
     # Desktop Privacy YouTube Client
     freetube
   ];
+
+  programs.mpv = {
+    enable = true;
+    config = {
+      ytdl-format = "bestaudio/best";
+      ytdl-raw-options = "cookies-from-browser=brave";
+    };
+  };
+   
+  programs.yt-dlp = {
+    enable = true;
+    settings = {
+    cookies-from-browser = "brave";
+    js-runtimes = "deno";
+    };
+  };
+  
 
   home.activation.wine4kDpi = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     for PFX in "$HOME/.local/share/Steam/steamapps/compatdata/"*/pfx \
@@ -462,7 +480,20 @@ xdg.portal = {
       ls = "eza --color=always --icons=always --group-directories-first";
       la = "eza -la --color=always --icons=always --group-directories-first";
       lt = "eza --tree --color=always --icons=always --group-directories-first";
-      music = "mpv --no-video --ytdl-format=bestaudio";
     };
-  };
+
+    initExtra = ''
+      # Search YouTube and play top results as a playlist in mpv
+      yt() {
+        local query="''${*// /+}"
+        mpv --no-video "https://youtube.com"
+      }
+
+      # Clean Brave/YouTube tracking junk after '&' and play URL
+      music() {
+        local clean_url="''${1%%&*}"
+        mpv --no-video "$clean_url"
+      }
+    '';    
+  };  
 }
