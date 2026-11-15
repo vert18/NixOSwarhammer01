@@ -230,6 +230,7 @@ xdg.portal = {
     config = {
       ytdl-format = "bestaudio/best";
       ytdl-raw-options = "cookies-from-browser=brave";
+      msg-level = "ffmpeg=fatal";
     };
   };
    
