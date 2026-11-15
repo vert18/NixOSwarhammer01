@@ -199,12 +199,15 @@
         actions = {
           update-props = {
             "node.description" = "Front Headphones (ESS ES9219 DAC)";
+            "audio.format" = "S32LE";
+            "audio.allowed-rates" = "44100,48000,88200,96000,176400,192000";
             "session.suspend-timeout-seconds" = 0;
             "priority.driver" = 2000;
             "priority.session" = 2000;
           };
         };
       }
+      
       # ADD THIS BLOCK FOR YOUR ANTLION MODMIC:
       {
         matches = [
@@ -232,6 +235,19 @@ systemd.user.services.wireplumber.serviceConfig.ExecStartPost = [
     done
   '')
 ];
+
+  services.pipewire.extraConfig.pipewire."92-low-latency-hifi" = {
+    "context.properties" = {
+      "default.clock.rate" = 48000;
+      "default.clock.allowed-rates" = [ 44100 48000 88200 96000 176400 192000 ];
+      "default.clock.quantum" = 1024;
+      "default.clock.min-quantum" = 256;
+      "default.clock.max-quantum" = 2048;
+    };
+    "stream.properties" = {
+      "resample.quality" = 10;
+    };
+  };
             
   # Define your personal user account
   users.users.fearless = {
