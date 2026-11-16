@@ -107,17 +107,17 @@ xdg.portal = {
     "hypr/hyprland.lua".source = config.lib.file.mkOutOfStoreSymlink "/home/fearless/nixos-config/dotfiles/hypr/hyprland.lua";
   };
 
-  wayland.windowManager.hyprland = {
-      enable = true;
-      xwayland.enable = true;
-      systemd.enable = false;
+      #wayland.windowManager.hyprland = {
+      #enable = true;
+      #xwayland.enable = true;
+      #systemd.enable = false;
       # Add basic fallback config lines if you want to bypass your dotfiles
       # settings = {
       #     "$mod" = "SUPER";
       #     bind = [
       #     "$mod, Return, exec, kitty"
       # ];
-  };
+      # };
 
   # Write standalone configuration maps forcing Adwaita-dark system-wide
   xdg.configFile."qt5ct/qt5ct.conf".text = ''
@@ -310,10 +310,10 @@ xdg.portal = {
     WantedBy=graphical-session.target
   '';
 
-  # Out-of-store link for the case display config file
-  xdg.configFile."af-pro-display/config.toml".source =
-    config.lib.file.mkOutOfStoreSymlink "/home/fearless/nixos-config/af-pro-display-config.toml";
-
+# Out-of-store link for the case display config file
+xdg.configFile."af-pro-display/config.toml".source =
+  config.lib.file.mkOutOfStoreSymlink "/home/fearless/nixos-config/dotfiles/umbriel/af-pro-display-config.toml";
+  
   # DEPLOY NEOVIM WITH LOCAL AI AUTO-SUGGESTIONS BINDINGS
   programs.neovim = {
     enable = true;
