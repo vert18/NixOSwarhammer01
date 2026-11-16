@@ -85,18 +85,26 @@ in
   programs.umbriel.enable = false;
   programs.noctalia.enable = false;
 
-xdg.portal = {
-  enable = true;
-  extraPortals = [
-    pkgs.xdg-desktop-portal-gtk
-    pkgs.xdg-desktop-portal-wlr
-  ];
-  config.common = {
-    default = [ "gtk" ];
-    "org.freedesktop.impl.portal.Screenshot" = [ "wlr" ];
-    "org.freedesktop.impl.portal.ScreenCast" = [ "wlr" ];
+  xdg.portal = {
+    enable = true;
+    extraPortals = with pkgs; [
+      xdg-desktop-portal-hyprland
+      xdg-desktop-portal-gtk
+      xdg-desktop-portal-wlr
+    ];
+    config = {
+      common = {
+        default = [ "gtk" ];
+        "org.freedesktop.impl.portal.Screenshot" = [ "wlr" ];
+        "org.freedesktop.impl.portal.ScreenCast" = [ "wlr" ];
+      };
+      hyprland = {
+        default = [ "hyprland" "gtk" ];
+        "org.freedesktop.impl.portal.Screenshot" = [ "hyprland" ];
+        "org.freedesktop.impl.portal.ScreenCast" = [ "hyprland" ];
+      };
+    };
   };
-};
 
   # 2. Tell Home Manager to link to normal, writeable files in your config directory
   xdg.configFile = {

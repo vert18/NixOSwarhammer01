@@ -10,13 +10,14 @@ hl.monitor({
 hl.env("XCURSOR_SIZE", "24")
 hl.env("HYPRCURSOR_SIZE", "24")
 hl.env("__NV_DISABLE_EXPLICIT_SYNC", "1")
-
 hl.on("hyprland.start", function()
     hl.exec_cmd("dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=Hyprland")
+    hl.exec_cmd("systemctl --user restart xdg-desktop-portal xdg-desktop-portal-hyprland")
     hl.exec_cmd("sh -c 'sleep 1 && __EGL_VENDOR_LIBRARY_FILENAMES=/run/opengl-driver/share/glvnd/egl_vendor.d/50_mesa.json noctalia'")
     hl.exec_cmd("lxqt-policykit-agent")
     hl.exec_cmd("nm-applet --indicator")
 end)
+
 
 -- 4. LOOK, FEEL & INPUT (Matches Umbriel 24px gaps & dwindle layout)
 hl.config({
