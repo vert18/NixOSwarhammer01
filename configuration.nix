@@ -322,6 +322,12 @@ systemd.user.services.wireplumber.serviceConfig.ExecStartPost = [
     };
   };
 
+   services.displayManager.sessionPackages = [
+     (pkgs.callPackage ./pkgs/zoolander.nix {
+        otr = pkgs.callPackage ./pkgs/otr.nix { };
+     })
+   ];
+
   # Replicates your exact TTY workflow automatically after you log in
   #environment.etc."greetd/environments".text = ''
   #  dbus-run-session umbriel

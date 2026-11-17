@@ -233,6 +233,10 @@ in
 
     # Desktop Privacy YouTube Client
     freetube
+    # Zoolander Wayland Compositor (Isolated test build)
+    (pkgs.callPackage ./pkgs/zoolander.nix {
+      otr = pkgs.callPackage ./pkgs/otr.nix { };
+    })
   ];
 
   programs.mpv = {
@@ -505,6 +509,6 @@ xdg.configFile."af-pro-display/config.toml".source =
         local clean_url="''${1%%&*}"
         mpv --no-video "$clean_url"
       }
-    '';    
-  };  
+    '';
+  };
 }
