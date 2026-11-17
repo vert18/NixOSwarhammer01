@@ -1,0 +1,32 @@
+local function run(command)
+    assert(zl.exec_command(command))
+end
+
+zl.on("startup", function()
+    if ZL_AMD_VM_TEST then
+        run("env LD_LIBRARY_PATH=/home/zoo/otter-test /home/zoo/otter-test/otter-bar > /tmp/otter-bar.log 2>&1 &")
+        run("wayland-info > /tmp/zoolander-wayland-info.log 2>&1 &")
+        run("sh -c 'sleep 4; grim -o HDMI-A-1 /tmp/zoolander-hdmi.png; grim -o DP-1 /tmp/zoolander-dp.png' &")
+        return
+    end
+    run("dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP")
+    run("dbus-update-activation-environment --systemd DISPLAY WAYLAND_DISPLAY")
+    run("systemctl --user import-environment DISPLAY WAYLAND_DISPLAY XDG_CURRENT_DESKTOP")
+    run("env | cut -d= -f1 | xargs systemctl --user import-environment")
+    run("otter-wallpaper &")
+    run("otter-osd &")
+    run("otter-notifications &")
+    run("otter-polkit &")
+    run("otter-idle &")
+    run("otter-theme-gen &")
+    run("otter-weather --watch 900 --write-cache &")
+    run("otter-transcribe &")
+    run("otter-search &")
+    run("otter-clip daemon &")
+    run("otter-bar &")
+    run("xdg-user-dirs-update &")
+    run("pikman-update-manager-autostart &")
+    run("dconf write /org/gnome/desktop/interface/cursor-size 24 &")
+    run("openrgb --startminimized --profile \"h\" &")
+    run("otter-assist &")
+end)

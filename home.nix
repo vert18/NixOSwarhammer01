@@ -115,17 +115,11 @@ in
     "hypr/hyprland.lua".source = config.lib.file.mkOutOfStoreSymlink "/home/fearless/nixos-config/dotfiles/hypr/hyprland.lua";
   };
 
-      #wayland.windowManager.hyprland = {
-      #enable = true;
-      #xwayland.enable = true;
-      #systemd.enable = false;
-      # Add basic fallback config lines if you want to bypass your dotfiles
-      # settings = {
-      #     "$mod" = "SUPER";
-      #     bind = [
-      #     "$mod, Return, exec, kitty"
-      # ];
-      # };
+  xdg.configFile."zoolander" = {
+    source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nixos-config/dotfiles/zoolander";
+    force = true;
+   };
+      
 
   # Write standalone configuration maps forcing Adwaita-dark system-wide
   xdg.configFile."qt5ct/qt5ct.conf".text = ''
