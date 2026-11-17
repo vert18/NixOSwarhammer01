@@ -77,9 +77,9 @@ stdenv.mkDerivation rec {
     grep -rl "/usr/share/vulkan" zooland/ zoolander/ | while read -r f; do
       substituteInPlace "$f" --replace-quiet "/usr/share/vulkan" "/run/opengl-driver/share/vulkan"
     done
-
-    grep -rl "/usr/bin/Xwayland" zoolander/ | while read -r f; do
-      substituteInPlace "$f" --replace-quiet "/usr/bin/Xwayland" "${xwayland}/bin/Xwayland"
+    
+    grep -rl "/usr/bin/Xwayland" zoolander/ zooland/ | while read -r f; do
+      substituteInPlace "$f" --replace-quiet "/usr/bin/Xwayland" "$out/libexec/Xwayland"
     done
 
     grep -rl "DRM_PLANE_TYPE_CURSOR" zooland/ | while read -r f; do
@@ -144,22 +144,28 @@ stdenv.mkDerivation rec {
   installPhase = ''
     runHook preInstall
 
-    mkdir -p $out/bin $out/lib/zoolander $out/share/zoolander $out/share/wayland-sessions
-    cp zoolander $out/bin/
-    cp ../zoolanderctl $out/bin/
-    chmod +x $out/bin/zoolanderctl
-    cp libzoolander_bell.so libzoolander_audio_visualizer.so $out/lib/zoolander/
-    cp -r ../config $out/share/zoolander/
-
+ mkdir -p $out/bin $out/libexec $out/lib/zoolander $out/share/zoolander $out/share/wayland-sessions
+ cp zoolander $out/bin/
+ cp ../zoolanderctl $out/bin/
+ chmod +x $out/bin/zoolanderctl
+ cp libzoolander_bell.so libzoolander_audio_visualizer.so $out/lib/zoolander/
+ cp -r ../config $out/share/zoolander/
+    
+    cat > $out/libexec/Xwayland << EOF
+#!/bin/sh
+exec ${xwayland}/bin/Xwayland -shm "\$@"
+EOF
+    chmod +x $out/libexec/Xwayland
+    
     cat > $out/share/wayland-sessions/zoolander.desktop << EOF
 [Desktop Entry]
 Name=Zoolander
 Comment=Zoolander Wayland Compositor
-Exec=sh -c 'mkdir -p /home/fearless/.local/state && LD_LIBRARY_PATH=${vulkan-loader}/lib XCURSOR_PATH=/run/current-system/sw/share/icons XCURSOR_THEME=breeze_cursors XCURSOR_SIZE=36 VK_DRIVER_FILES=/run/opengl-driver/share/vulkan/icd.d/nvidia_icd.json VK_ICD_FILENAMES=/run/opengl-driver/share/vulkan/icd.d/nvidia_icd.json exec dbus-run-session $out/bin/zoolander > /home/fearless/.local/state/zoolander.log 2>&1'
+Exec=sh -c 'mkdir -p /home/fearless/.local/state && PATH=$out/libexec:\$PATH LD_LIBRARY_PATH=${vulkan-loader}/lib XCURSOR_PATH=/run/current-system/sw/share/icons XCURSOR_THEME=breeze_cursors XCURSOR_SIZE=24 VK_DRIVER_FILES=/run/opengl-driver/share/vulkan/icd.d/nvidia_icd.json VK_ICD_FILENAMES=/run/opengl-driver/share/vulkan/icd.d/nvidia_icd.json exec dbus-run-session $out/bin/zoolander > /home/fearless/.local/state/zoolander.log 2>&1'
 Type=Application
 DesktopNames=zoolander
 EOF
-
+     
     runHook postInstall
   '';
 
