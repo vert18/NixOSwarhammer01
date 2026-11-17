@@ -14,7 +14,15 @@ zl.set_dwindle({
 })
 zl.set_keyboard({ repeat_rate = 50, repeat_delay = 300, numlock = true })
 zl.set_pointer({ left_handed = false, accel_profile = "flat", follow_mouse = 2 })
-zl.set_presentation({ allow_tearing = true, immediate_fullscreen = true, vrr = 2, direct_scanout = false, hdr = "auto" })
+zl.set_presentation({
+    allow_tearing = true,
+    immediate_fullscreen = true,
+    vrr = 2,
+    direct_scanout = false,
+    hdr = "auto",
+    sdr_brightness = 1.4,
+    sdr_saturation = 1.0,
+})
 zl.set_window_style({
     gaps_in = 3,
     gaps_out = 6,
