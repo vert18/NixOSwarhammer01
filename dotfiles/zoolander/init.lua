@@ -50,9 +50,10 @@ zl.set_window_style({
         color_inactive = "#00000073",
     },
 })
+
 split.setup({
     workspace_count = 5,
-    monitor_priority = { "DP-3", "DP-2" },
+    monitor_priority = { "DP-1" },
     enable_wrapping = false,
 })
 zl.set_workspace_layout("3", "scrolling", 0.6, 1)
