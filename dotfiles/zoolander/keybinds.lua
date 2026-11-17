@@ -81,6 +81,7 @@ bind("XF86AudioStop", command("playerctl stop"), locked)
 bind("XF86AudioPrev", command("playerctl previous"), locked)
 bind("XF86AudioNext", command("playerctl next"), locked)
 bind("SUPER + D", command("noctalia msg panel-toggle launcher"))
+bind("SUPER + SHIFT + H", function() return zl.toggle_hdr() end)
 bind("SUPER + SHIFT + M", function() zl.quit() end)
 -- Focus/move/resize arrows, layout cycling, shelves, anchors, inspection and
 -- the command sheet: see layouts.lua.
