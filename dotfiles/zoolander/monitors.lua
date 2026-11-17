@@ -11,7 +11,7 @@ zl.output_rule({
     output = "DP-1",
     width = 3840,
     height = 2160,
-    refresh = 120,
+    refresh = 144,
     x = 0,
     y = 0,
     scale = 1.67,
