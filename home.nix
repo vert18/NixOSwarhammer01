@@ -218,6 +218,7 @@ in
     steam-run # Isolates and executes standalone unmanaged binaries natively
     p7zip # Multi-format deep archive compression engine
     unrar # Archive extraction dependency tools
+    unzip
 
     # Core CLI Audio Streamers
     #mpv
@@ -489,6 +490,7 @@ xdg.configFile."af-pro-display/config.toml".source =
       ls = "eza --color=always --icons=always --group-directories-first";
       la = "eza -la --color=always --icons=always --group-directories-first";
       lt = "eza --tree --color=always --icons=always --group-directories-first";
+      wrye-ooo = ''WINEPREFIX="/home/fearless/.local/share/Steam/steamapps/compatdata/4055286034/pfx" steam-run protontricks-launch --appid 4055286034 "/mnt/mylm/games/oooA93/Mopy/Wrye Bash.exe"'';
     };
 
     initExtra = ''
