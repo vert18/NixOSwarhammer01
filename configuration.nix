@@ -342,6 +342,7 @@ systemd.user.services.wireplumber.serviceConfig.ExecStartPost = [
 
   # System Components and Shell Environment Assets
   environment.systemPackages = with pkgs; [
+    tree
     git
     vim
     nano
