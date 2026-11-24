@@ -8,6 +8,7 @@
     
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-26.05";
+    nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
 
     # ADD THE DISKO INPUT COMPONENT HERE
     disko = {
@@ -35,7 +36,15 @@
     };    
   };  
 
-  outputs = { self, nixpkgs, disko, helium, umbriel, noctalia, home-manager, ... }@inputs: {
+  outputs = { self, nixpkgs, disko, helium, umbriel, noctalia, nixpkgs-unstable, home-manager, ... }@inputs:
+    let
+      system = "x86_64-linux";
+      pkgs-unstable = import nixpkgs-unstable {
+        inherit system;
+        config.allowUnfree = true;
+      };
+    in
+    {
     nixosConfigurations.warhammer = nixpkgs.lib.nixosSystem {
       specialArgs = { inherit inputs; };
       modules = [
@@ -58,7 +67,7 @@
         home-manager.nixosModules.home-manager {
           home-manager.useGlobalPkgs = true;
           home-manager.useUserPackages = true;
-          home-manager.extraSpecialArgs = { inherit inputs; };
+          home-manager.extraSpecialArgs = { inherit inputs pkgs-unstable; };
           home-manager.backupFileExtension = "hm-backup";
           home-manager.users.fearless = import ./home.nix;
         }

@@ -1,23 +1,26 @@
 [opener]
 edit = [
-    { run = 'nvim "$1"', block = true, desc = "Open with Neovim" }
+  { run = 'nvim "$1"', block = true, desc = "Open with Neovim" },
+]
+image = [
+  { run = 'oculante "$@"', orphan = true, desc = "Oculante", for = "linux" },
 ]
 
 [manager]
 show_hidden = true
 
 [open]
-rules = [
-    { url = "*.nix", use = "edit" },
-    { url = "*.toml", use = "edit" },
-    { mime = "text/*", use = "edit" }
+prepend_rules = [
+  { mime = "image/*", use = "image" },
+  { url = "*.nix", use = "edit" },
+  { url = "*.toml", use = "edit" },
+  { mime = "text/*", use = "edit" },
 ]
 
-# FIXED: Placed shortcuts inside their proper keymap block context
 [keymap]
 manager = [
-    { on = [ "d" ], run = "noop", desc = "Disabled default trash shortcut for safety" },
-    { on = [ "D" ], run = "noop", desc = "Disabled default permanent delete shortcut for safety" },
-    { on = [ "<Delete>" ], run = "noop", desc = "Disabled physical delete key for safety" }
+  { on = [ "d" ], run = "noop", desc = "Disabled default trash shortcut for safety" },
+  { on = [ "D" ], run = "noop", desc = "Disabled default permanent delete shortcut for safety" },
+  { on = [ "<Delete>" ], run = "noop", desc = "Disabled physical delete key for safety" },
 ]
 

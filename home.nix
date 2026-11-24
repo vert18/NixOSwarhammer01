@@ -1,6 +1,7 @@
 {
   inputs,
   pkgs,
+  pkgs-unstable,
   config,
   lib,
   ...
@@ -195,6 +196,8 @@ in
     slurp
     networkmanagerapplet # Graphical network management utility tray panel
     lxqt.lxqt-policykit # Handles administrative visual authentication loops
+    pkgs-unstable.oculante
+    pkgs.xdg-utils
 
     # Communication & General Applications
     firefox # Primary web browser
@@ -469,6 +472,13 @@ xdg.configFile."af-pro-display/config.toml".source =
       "x-scheme-handler/https" = [ "helium.desktop" ];
       "x-scheme-handler/about" = [ "helium.desktop" ];
       "x-scheme-handler/unknown" = [ "helium.desktop" ];
+      "image/png" = [ "oculante.desktop" ];
+      "image/jpeg" = [ "oculante.desktop" ];
+      "image/webp" = [ "oculante.desktop" ];
+      "image/gif" = [ "oculante.desktop" ];
+      "image/bmp" = [ "oculante.desktop" ];
+      "image/tiff" = [ "oculante.desktop" ];
+      "image/jxl" = [ "oculante.desktop" ];
     };
   };
 
