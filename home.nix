@@ -501,7 +501,12 @@ xdg.configFile."af-pro-display/config.toml".source =
       la = "eza -la --color=always --icons=always --group-directories-first";
       lt = "eza --tree --color=always --icons=always --group-directories-first";
       wrye-ooo = ''WINEPREFIX="/home/fearless/.local/share/Steam/steamapps/compatdata/4055286034/pfx" steam-run protontricks-launch --appid 4055286034 "/mnt/mylm/games/oooA93/Mopy/Wrye Bash.exe"'';
-    };
+      xedit-ooo = ''PROTON_USE_XALIA=0 WINEPREFIX="/home/fearless/.local/share/Steam/steamapps/compatdata/4055286034/pfx" steam-run protontricks-launch --appid 4055286034 "/mnt/mylm/games/oooA93/xEdit-4.1.5s/xTESEdit.exe" -TES4R -D:"Z:\mnt\mylm\games\oooA93\OblivionRemastered\Content\Dev\ObvData\Data" -C:"Z:\mnt\mylm\games\oooA93\xEdit-4.1.5s\cache"'';
+
+
+
+
+   };
 
     initExtra = ''
       # Search YouTube and play top results as a playlist in mpv

@@ -348,13 +348,13 @@ systemd.user.services.wireplumber.serviceConfig.ExecStartPost = [
     nano
     wireplumber
     brightnessctl
-    solaar
     nixd
     nixfmt
     foot
     usbutils
     alsa-utils
     pavucontrol
+    ripgrep
 
     # PRINTER UTILITIES & FIRMWARE LAYERS
     hplipWithPlugin # FIXED: Exposes hp-setup and handles network firmware hooks
